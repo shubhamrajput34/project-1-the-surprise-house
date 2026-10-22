@@ -16,13 +16,14 @@
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html, body { height: 100%; }
+  html, body { height: 100%; cursor: url('flower-cursor.png') 13 0, auto; }
 
   body {
     background: var(--night);
     color: var(--blush);
     font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
     -webkit-font-smoothing: antialiased;
+    cursor: url('flower-cursor.png') 13 0, auto;
   }
 
   .hero {
@@ -1926,6 +1927,15 @@ const PRODUCTS = [{"id": "key-chain", "name": "Key chain", "category": "Accessor
     if (page === 'wishlist') renderWishlist();
     if (page === 'cart' || page === 'checkout') renderCart();
     if (page === 'orders') { renderOrders(); renderRequestsAndApplications(); }
+    if (page === 'customize') {
+      const u = currentUser();
+      if (u) {
+        const n = document.getElementById('name');
+        const c = document.getElementById('contact');
+        if (n && !n.value) n.value = u.name || '';
+        if (c && !c.value) c.value = u.contact || '';
+      }
+    }
     updateLogoutLinks();
     updateWishCount();
     closeDrawer();
@@ -1954,25 +1964,104 @@ const PRODUCTS = [{"id": "key-chain", "name": "Key chain", "category": "Accessor
     reader.readAsDataURL(file);
   });
 
-  function showThanks() {
+  async function submitCustomization() {
     const user = currentUser();
-    const application = {
-      id: 'CUS' + Date.now().toString().slice(-6),
-      created: new Date().toLocaleString(),
-      product: document.getElementById('product').value,
-      idea: document.getElementById('idea').value.trim(),
-      hasPicture: !!document.getElementById('ideaPic').files.length
-    };
-    const key = 'sh_custom_' + user.contact;
-    store.set(key, JSON.stringify([...JSON.parse(store.get(key) || '[]'), application]));
-    document.getElementById('customForm').style.display = 'none';
-    document.getElementById('thanks').classList.add('show');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const form = document.getElementById('customForm');
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn ? submitBtn.textContent : 'Apply for customization';
+
+    const productVal = document.getElementById('product').value;
+    const ideaVal = document.getElementById('idea').value.trim();
+    const nameVal = document.getElementById('name').value.trim() || (user ? user.name : '');
+    const contactVal = document.getElementById('contact').value.trim() || (user ? user.contact : '');
+    const picInput = document.getElementById('ideaPic');
+
+    if (!productVal) {
+      alert('Please choose a product to customize.');
+      return;
+    }
+    if (!nameVal || !contactVal) {
+      alert('Please provide your name and contact details so we can reach you.');
+      return;
+    }
+
+    if (submitBtn) {
+      submitBtn.textContent = 'Submitting your idea...';
+      submitBtn.disabled = true;
+    }
+
+    const formData = new FormData();
+    formData.append('product', productVal);
+    formData.append('idea', ideaVal);
+    formData.append('name', nameVal);
+    formData.append('contact', contactVal);
+
+    if (picInput && picInput.files && picInput.files[0]) {
+      formData.append('ideaPic', picInput.files[0]);
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/customizations', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.status === 'success') {
+        const savedCustom = result.data || {
+          id: 'CUS' + Date.now().toString().slice(-6),
+          created: new Date().toLocaleString(),
+          product: productVal,
+          idea: ideaVal,
+          hasPicture: !!(picInput && picInput.files && picInput.files.length)
+        };
+        const appKey = 'sh_custom_' + (user ? user.contact : contactVal);
+        const existing = JSON.parse(store.get(appKey) || '[]');
+        store.set(appKey, JSON.stringify([...existing, {
+          id: savedCustom.id,
+          created: new Date().toLocaleString(),
+          product: productVal,
+          idea: ideaVal,
+          hasPicture: !!(picInput && picInput.files && picInput.files.length),
+          imagePath: savedCustom.imagePath || null
+        }]));
+
+        form.style.display = 'none';
+        document.getElementById('thanks').classList.add('show');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        alert('Error: ' + (result.message || 'Could not submit customization request.'));
+        if (submitBtn) {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
+        }
+      }
+    } catch (err) {
+      console.warn('Network issue or backend offline, falling back to local save:', err);
+      const appKey = 'sh_custom_' + (user ? user.contact : contactVal);
+      const existing = JSON.parse(store.get(appKey) || '[]');
+      store.set(appKey, JSON.stringify([...existing, {
+        id: 'CUS' + Date.now().toString().slice(-6),
+        created: new Date().toLocaleString(),
+        product: productVal,
+        idea: ideaVal,
+        hasPicture: !!(picInput && picInput.files && picInput.files.length)
+      }]));
+      form.style.display = 'none';
+      document.getElementById('thanks').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally {
+      if (submitBtn) {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+      }
+    }
   }
 
   document.getElementById('customForm').addEventListener('submit', (event) => {
     event.preventDefault();
-    requireAccount(showThanks, 'Create an account to apply for customization.');
+    requireAccount(submitCustomization, 'Create an account to apply for customization.');
   });
 
 </script>
