@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard | The Surprise House</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blush: #5a2a3d;
+    --rose: #b4587f;
+    --pink: #d9578a;
+    --pink-soft: #fbd5e1;
+    --muted: #7a4a5e;
+    --bg: #fdf1f5;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--blush);
+    font-family: 'Fraunces', Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 2rem 1.5rem 5rem;
+  }
+
+  header {
+    max-width: 72rem;
+    margin: 0 auto 2.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border-bottom: 1.5px solid #f7dbe5;
+    padding-bottom: 1.5rem;
+  }
+
+  .brand h1 {
+    font-weight: 300;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    letter-spacing: -0.02em;
+    color: var(--blush);
+  }
+
+  .brand p {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--rose);
+    font-size: 1.05rem;
+  }
+
+  .nav-actions {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+  }
+
+  .nav-btn {
+    text-decoration: none;
+    padding: 0.6rem 1.3rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 400;
+    border: 1.5px solid var(--pink);
+    background: #ffffff;
+    color: var(--pink);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .nav-btn:hover { background: #fdeaf1; }
+  .nav-btn.primary { background: var(--pink); color: #fff; }
+  .nav-btn.primary:hover { background: #c24479; }
+
+  /* Stats Grid */
+  .stats-grid {
+    max-width: 72rem;
+    margin: 0 auto 2.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1.2rem;
+  }
+
+  .stat-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 1.6rem 1.8rem;
+    box-shadow: 0 14px 36px rgba(217, 87, 138, 0.09);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .stat-label {
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .stat-val {
+    font-size: 2.2rem;
+    font-weight: 400;
+    color: var(--blush);
+  }
+
+  /* Tabs */
+  .tabs-bar {
+    max-width: 72rem;
+    margin: 0 auto 2rem;
+    display: flex;
+    gap: 0.6rem;
+    border-bottom: 2px solid #f3c4d4;
+    padding-bottom: 0.6rem;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    font: inherit;
+    font-size: 1.15rem;
+    padding: 0.6rem 1.4rem;
+    border-radius: 14px;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.25s ease;
+  }
+
+  .tab-btn.active {
+    background: #ffffff;
+    color: var(--pink);
+    font-weight: 400;
+    box-shadow: 0 6px 18px rgba(217, 87, 138, 0.15);
+  }
+
+  /* Content Containers */
+  .main-content {
+    max-width: 72rem;
+    margin: 0 auto;
+  }
+
+  .tab-pane { display: none; }
+  .tab-pane.show { display: block; }
+
+  /* Cards List */
+  .cards-list {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .order-item, .custom-item {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 1.8rem;
+    box-shadow: 0 14px 36px rgba(217, 87, 138, 0.09);
+    display: grid;
+    gap: 1rem;
+  }
+
+  .item-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    border-bottom: 1px solid #f7dbe5;
+    padding-bottom: 0.8rem;
+  }
+
+  .item-id {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--blush);
+  }
+
+  .item-date {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.2rem;
+  }
+
+  .info-block h4 {
+    font-size: 0.95rem;
+    color: var(--rose);
+    font-weight: 400;
+    margin-bottom: 0.3rem;
+  }
+
+  .info-block p {
+    font-size: 1rem;
+    font-weight: 300;
+    color: #6a3a50;
+    line-height: 1.5;
+  }
+
+  .status-control {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-top: 0.4rem;
+  }
+
+  select.status-select {
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 1.5px solid #f0a9c2;
+    background: #fff7fa;
+    color: var(--blush);
+    font: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .img-preview-thumb {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1.5px solid #f3c4d4;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+
+  .img-preview-thumb:hover { transform: scale(1.05); }
+
+  .badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 400;
+  }
+
+  .badge-placed { background: #fff0f5; color: var(--pink); border: 1px solid #f9c2d6; }
+  .badge-packed { background: #fef7e0; color: #b7791f; border: 1px solid #fce588; }
+  .badge-shipped { background: #e6fffa; color: #234e52; border: 1px solid #81e6d9; }
+  .badge-delivered { background: #f0fff4; color: #22543d; border: 1px solid #9ae6b4; }
+  .badge-cancelled { background: #fff5f5; color: #9b2c2c; border: 1px solid #feb2b2; }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    background: #ffffff;
+    border-radius: 24px;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--blush);
+    color: #ffffff;
+    padding: 0.9rem 1.6rem;
+    border-radius: 999px;
+    box-shadow: 0 10px 25px rgba(90, 42, 61, 0.3);
+    font-size: 0.95rem;
+    display: none;
+    z-index: 100;
+  }
+  .toast.show { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>The Surprise House</h1>
+    <p>Admin Control Dashboard 🌸</p>
+  </div>
+  <div class="nav-actions">
+    <a href="indexfront.html" class="nav-btn">&larr; Back to Shop</a>
+    <button id="refresh-btn" class="nav-btn primary">Refresh Data ⟳</button>
+  </div>
+</header>
+
+<!-- Statistics Row -->
+<section class="stats-grid">
+  <div class="stat-card">
+    <span class="stat-label">Total Revenue</span>
+    <span class="stat-val" id="stat-revenue">₹0</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Total Orders</span>
+    <span class="stat-val" id="stat-orders">0</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Customization Requests</span>
+    <span class="stat-val" id="stat-customs">0</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Registered Customers</span>
+    <span class="stat-val" id="stat-users">0</span>
+  </div>
+</section>
+
+<!-- Tabs Bar -->
+<div class="tabs-bar">
+  <button class="tab-btn active" data-tab="orders">📦 Orders (<span id="count-orders">0</span>)</button>
+  <button class="tab-btn" data-tab="customizations">🎨 Customizations (<span id="count-customs">0</span>)</button>
+</div>
+
+<main class="main-content">
+  <!-- Orders Tab -->
+  <section id="pane-orders" class="tab-pane show">
+    <div id="orders-container" class="cards-list">
+      <div class="empty-state">Loading orders from server...</div>
+    </div>
+  </section>
+
+  <!-- Customizations Tab -->
+  <section id="pane-customizations" class="tab-pane">
+    <div id="customizations-container" class="cards-list">
+      <div class="empty-state">Loading customization ideas...</div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast">Status updated! 🌸</div>
+
+<script>
+  const ORDER_STATUS_LABELS = ['Placed', 'Packed', 'Out for delivery', 'Delivered'];
+  const ORDER_BADGE_CLASSES = ['badge-placed', 'badge-packed', 'badge-shipped', 'badge-delivered'];
+
+  // Switch Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show'));
+      btn.classList.add('active');
+      document.getElementById('pane-' + btn.dataset.tab).classList.add('show');
+    });
+  });
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  // Load Dashboard Data
+  async function loadDashboard() {
+    try {
+      // 1. Fetch Stats
+      const statsRes = await fetch('http://localhost:5000/api/admin/stats');
+      if (statsRes.ok) {
+        const stats = await statsRes.json();
+        document.getElementById('stat-revenue').textContent = '₹' + (stats.totalRevenue || 0);
+        document.getElementById('stat-orders').textContent = stats.ordersCount || 0;
+        document.getElementById('stat-customs').textContent = stats.customizationsCount || 0;
+        document.getElementById('stat-users').textContent = stats.usersCount || 0;
+        document.getElementById('count-orders').textContent = stats.ordersCount || 0;
+        document.getElementById('count-customs').textContent = stats.customizationsCount || 0;
+      }
+
+      // 2. Fetch Orders
+      const ordersRes = await fetch('http://localhost:5000/api/orders/all');
+      if (ordersRes.ok) {
+        const data = await ordersRes.json();
+        renderOrdersList(data.orders || []);
+      }
+
+      // 3. Fetch Customizations
+      const customsRes = await fetch('http://localhost:5000/api/customizations');
+      if (customsRes.ok) {
+        const data = await customsRes.json();
+        renderCustomizationsList(data.data || []);
+      }
+    } catch (err) {
+      console.error('Failed to load admin data:', err);
+      showToast('Could not reach backend server.');
+    }
+  }
+
+  function renderOrdersList(orders) {
+    const box = document.getElementById('orders-container');
+    if (!orders.length) {
+      box.innerHTML = '<div class="empty-state">No customer orders placed yet.</div>';
+      return;
+    }
+
+    box.innerHTML = orders.map(o => {
+      const isCancelled = !!o.cancelled;
+      const statusIdx = typeof o.status === 'number' ? o.status : 0;
+      const badgeClass = isCancelled ? 'badge-cancelled' : ORDER_BADGE_CLASSES[statusIdx];
+      const badgeText = isCancelled ? 'Cancelled' : ORDER_STATUS_LABELS[statusIdx];
+
+      return `
+      <div class="order-item">
+        <div class="item-head">
+          <div>
+            <span class="item-id">Order #${o.id}</span>
+            <span class="badge ${badgeClass}" style="margin-left: 0.6rem;">${badgeText}</span>
+          </div>
+          <span class="item-date">${o.date}</span>
+        </div>
+
+        <div class="item-grid">
+          <div class="info-block">
+            <h4>Customer Details</h4>
+            <p><strong>${o.details.name}</strong></p>
+            <p>📞 <a href="tel:${o.details.phone}" style="color: inherit;">${o.details.phone}</a></p>
+            <p>📍 ${o.details.address}, PIN: ${o.details.pincode}</p>
+          </div>
+
+          <div class="info-block">
+            <h4>Items Ordered</h4>
+            <p>${o.items.map(i => `${i.product} (×${i.qty}) — ₹${i.price * i.qty}`).join('<br>')}</p>
+            <p style="margin-top: 0.4rem;"><strong>Total:</strong> ₹${o.total} (${o.payment})</p>
+            ${o.details.notes ? `<p style="font-style: italic; color: #b4587f; margin-top: 0.3rem;">Note: "${o.details.notes}"</p>` : ''}
+          </div>
+
+          <div class="info-block">
+            <h4>Update Package Status</h4>
+            ${isCancelled ? '<p style="color: #9b2c2c;">This order was cancelled by customer.</p>' : `
+              <div class="status-control">
+                <select class="status-select" onchange="updateOrderStatus('${o.id}', this.value)">
+                  <option value="0" ${statusIdx === 0 ? 'selected' : ''}>Step 1: Placed</option>
+                  <option value="1" ${statusIdx === 1 ? 'selected' : ''}>Step 2: Packed</option>
+                  <option value="2" ${statusIdx === 2 ? 'selected' : ''}>Step 3: Out for delivery</option>
+                  <option value="3" ${statusIdx === 3 ? 'selected' : ''}>Step 4: Delivered</option>
+                </select>
+              </div>
+              <small style="color: var(--muted); font-style: italic; display:block; margin-top:0.4rem;">
+                Changes customer's tracking dots live!
+              </small>
+            `}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderCustomizationsList(customs) {
+    const box = document.getElementById('customizations-container');
+    if (!customs.length) {
+      box.innerHTML = '<div class="empty-state">No custom design requests submitted yet.</div>';
+      return;
+    }
+
+    box.innerHTML = customs.map(c => {
+      const cleanPhone = (c.contact || '').replace(/[^0-9]/g, '');
+      const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=Hi%20${encodeURIComponent(c.name)}!%20Regarding%20your%20custom%20idea%20for%20${encodeURIComponent(c.product)}...` : null;
+
+      return `
+      <div class="custom-item">
+        <div class="item-head">
+          <div>
+            <span class="item-id">Request #${c.id || 'CUS'}</span>
+            <span class="badge badge-placed" style="margin-left: 0.6rem;">${c.product}</span>
+          </div>
+          <span class="item-date">${new Date(c.createdAt).toLocaleString()}</span>
+        </div>
+
+        <div class="item-grid">
+          <div class="info-block">
+            <h4>Client Details</h4>
+            <p><strong>${c.name}</strong></p>
+            <p>📞 Contact: ${c.contact}</p>
+            ${waLink ? `<p style="margin-top:0.4rem;"><a href="${waLink}" target="_blank" class="nav-btn" style="padding:0.3rem 0.9rem; font-size:0.85rem; display:inline-block;">💬 Chat on WhatsApp</a></p>` : ''}
+          </div>
+
+          <div class="info-block">
+            <h4>Idea Description</h4>
+            <p style="font-style: italic; line-height:1.6;">"${c.idea || 'No description provided'}"</p>
+          </div>
+
+          <div class="info-block">
+            <h4>Inspiration Photo</h4>
+            ${c.imagePath ? `
+              <a href="http://localhost:5000${c.imagePath}" target="_blank" title="Click to view full photo">
+                <img src="http://localhost:5000${c.imagePath}" class="img-preview-thumb" alt="Client upload">
+              </a>
+              <small style="display:block; margin-top:0.3rem; color:var(--muted);">Click image to expand</small>
+            ` : '<p style="color:var(--muted); font-style:italic;">No photo uploaded</p>'}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Update order status live
+  async function updateOrderStatus(orderId, newStatus) {
+    try {
+      const res = await fetch(`http://localhost:5000/api/orders/${encodeURIComponent(orderId)}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: parseInt(newStatus, 10) })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(`Order #${orderId} status updated to Step ${parseInt(newStatus) + 1}! 🌸`);
+        loadDashboard();
+      } else {
+        alert(data.message || 'Could not update status');
+      }
+    } catch (err) {
+      alert('Failed to connect to server.');
+    }
+  }
+
+  document.getElementById('refresh-btn').addEventListener('click', () => {
+    loadDashboard();
+    showToast('Dashboard refreshed! 🌸');
+  });
+
+  // Initial Load
+  loadDashboard();
+</script>
+</body>
+</html>
