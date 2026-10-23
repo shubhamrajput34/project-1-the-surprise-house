@@ -1041,7 +1041,7 @@
     <div class="custom-cta">
       <div>
         <h3>Want something custom?</h3>
-        <p>Have an idea of your own? Tell us and we’ll create it for you.</p>
+        <p>Have an idea of your own? Tell us and weΓÇÖll create it for you.</p>
       </div>
       <a class="custom-cta-link" href="#customize">Start customization</a>
     </div>
@@ -1341,7 +1341,7 @@
 <script>
   // ---------- Shop settings: fill in your real prices, delivery fee and delivery area ----------
   const SHOP = {
-    currencySymbol: '₹',
+    currencySymbol: 'Γé╣',
     deliveryFee: null,          // e.g. 50. Null shows "To be confirmed"
     deliveryPincodes: [],       // e.g. ['495001', '495002']. Empty means any pincode is accepted for now
     contact: {
@@ -1937,8 +1937,8 @@ const PRODUCTS = [{"id": "key-chain", "name": "Key chain", "category": "Accessor
             ${ORDER_STEPS.map((step, i) => `<div class="step ${!cancelled && i <= statusIndex ? 'done' : ''} ${!cancelled && i === statusIndex ? 'current' : ''}"><span class="dot"></span><span>${esc(step)}</span></div>`).join('')}
           </div>
           <p class="order-meta"><strong>Current status:</strong> ${esc(statusText)}</p>
-          <p class="order-meta"><strong>Items:</strong> ${o.items.map((i) => `${esc(i.product)} × ${i.qty}`).join(', ')}</p>
-          <p class="order-meta"><strong>Total:</strong> ${showMoney(o.total)} · <strong>Payment:</strong> ${esc(o.payment)}</p>
+          <p class="order-meta"><strong>Items:</strong> ${o.items.map((i) => `${esc(i.product)} ├ù ${i.qty}`).join(', ')}</p>
+          <p class="order-meta"><strong>Total:</strong> ${showMoney(o.total)} ┬╖ <strong>Payment:</strong> ${esc(o.payment)}</p>
           <p class="order-meta"><strong>Delivery to:</strong> ${esc(o.details.address)}, ${esc(o.details.pincode)}</p>
           ${canCancel ? `<button type="button" class="order-cancel" data-cancel="${esc(o.id)}">Cancel order</button>` : ''}
           ${!cancelled && statusIndex > 0 ? '<p class="order-note">This order is already packed, so it can no longer be cancelled here. Please contact us for help.</p>' : ''}
@@ -2029,7 +2029,7 @@ const PRODUCTS = [{"id": "key-chain", "name": "Key chain", "category": "Accessor
     reqBox.innerHTML = requests.length ? requests.map((r) => `
       <div class="order-card">
         <div class="order-head"><strong>${esc(r.occasion)}</strong><span>${esc(r.created)}</span></div>
-        <p class="order-meta"><strong>Request:</strong> ${esc(r.id)} · <strong>Status:</strong> Received</p>
+        <p class="order-meta"><strong>Request:</strong> ${esc(r.id)} ┬╖ <strong>Status:</strong> Received</p>
         ${r.recipient ? `<p class="order-meta"><strong>For:</strong> ${esc(r.recipient)}</p>` : ''}
         ${r.neededBy ? `<p class="order-meta"><strong>Needed by:</strong> ${esc(r.neededBy)}</p>` : ''}
         ${r.details ? `<p class="order-meta"><strong>Details:</strong> ${esc(r.details)}</p>` : ''}
@@ -2039,7 +2039,7 @@ const PRODUCTS = [{"id": "key-chain", "name": "Key chain", "category": "Accessor
     custBox.innerHTML = apps.length ? apps.map((a) => `
       <div class="order-card">
         <div class="order-head"><strong>${esc(a.product || 'Customization')}</strong><span>${esc(a.created)}</span></div>
-        <p class="order-meta"><strong>Application:</strong> ${esc(a.id)} · <strong>Status:</strong> Received</p>
+        <p class="order-meta"><strong>Application:</strong> ${esc(a.id)} ┬╖ <strong>Status:</strong> Received</p>
         ${a.idea ? `<p class="order-meta"><strong>Idea:</strong> ${esc(a.idea)}</p>` : ''}
         ${a.hasPicture ? '<p class="order-note">You also uploaded a picture with this application. Our team will ask you for it again if needed.</p>' : ''}
       </div>`).join('') : '<p class="order-note">You have not sent any customization applications.</p>';
@@ -2053,7 +2053,7 @@ const PRODUCTS = [{"id": "key-chain", "name": "Key chain", "category": "Accessor
     if (c.email) lines.push(`<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`);
     if (c.phone) lines.push(`<span>${esc(c.phone)}</span>`);
     if (c.instagram) lines.push(`<a href="${esc(c.instagram)}" target="_blank" rel="noopener">Instagram</a>`);
-    document.getElementById('foot-contact').innerHTML = lines.join(' · ');
+    document.getElementById('foot-contact').innerHTML = lines.join(' ┬╖ ');
     const igLink = document.getElementById('reach-ig');
     const waLink = document.getElementById('reach-wa');
     igLink.href = c.instagram || '#help';
@@ -2166,7 +2166,7 @@ const PRODUCTS = [{"id": "key-chain", "name": "Key chain", "category": "Accessor
     const swatches = pr.colors.map(([n, c]) => `<div class="pd-swatch"><span style="background:${esc(c)}"></span>${esc(n)}</div>`).join('');
     const materials = pr.materials.map((m) => `<li>${esc(m)}</li>`).join('');
     const steps = pr.process.map((m) => `<li>${esc(m)}</li>`).join('');
-    const reviews = pr.reviews.map(([who, stars, text]) => `<div class="pd-review"><strong>${esc(who)}</strong><span class="pd-stars">${'★'.repeat(Number(stars))}</span><p>${esc(text)}</p></div>`).join('');
+    const reviews = pr.reviews.map(([who, stars, text]) => `<div class="pd-review"><strong>${esc(who)}</strong><span class="pd-stars">${'Γÿà'.repeat(Number(stars))}</span><p>${esc(text)}</p></div>`).join('');
     box.innerHTML = `
       <div class="pd-photo">${pr.gallery.length ? pr.gallery.map((src) => `<img src="${esc(imgSrc(src))}" alt="${esc(pr.name)}" onerror="this.style.display='none'">`).join('') : '<p class="pd-nopic">Picture to be added.</p>'}
         <button class="pd-heart pd-wish" type="button" data-id="${esc(pr.id)}" aria-label="${esc(wishLabel(pr.id))}" title="${esc(wishLabel(pr.id))}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></button></div>
