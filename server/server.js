@@ -1,10 +1,17 @@
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+
+// Ensure uploads folder exists
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 // 1. Load Local Database
 const db = require('./db');
@@ -17,7 +24,7 @@ app.use(cors());
 app.use(express.json());
 
 // 4. Make the "uploads" folder public so images can be viewed in browser
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadsDir));
 
 // 5. Configure Multer to save photos with safe, unique filenames
 const storage = multer.diskStorage({
@@ -344,6 +351,6 @@ app.get('/api/admin/stats', async (req, res) => {
 
 // 17. Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`✨ Server running smoothly at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✨ Server running smoothly on port ${PORT}`);
 });
