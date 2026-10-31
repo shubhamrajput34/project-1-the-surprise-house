@@ -194,6 +194,86 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// 10.5 FORGOT PASSWORD: Generate OTP / Reset Code
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { contact } = req.body;
+    if (!contact) {
+      return res.status(400).json({ status: 'error', message: 'Please provide your registered phone number or email.' });
+    }
+
+    const cleanContact = contact.trim().toLowerCase();
+    const user = await db.users.findOneAsync({ contact: cleanContact });
+    if (!user) {
+      return res.status(404).json({ status: 'error', message: 'No registered account found with this phone number or email.' });
+    }
+
+    // Generate 6-digit verification code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes
+
+    await db.users.updateAsync({ contact: cleanContact }, { $set: { resetOtp: code, resetOtpExpires: expiresAt } }, {});
+
+    const whatsappNumber = process.env.SHOP_WHATSAPP || '917803859907';
+    const msg = `Hello, I requested a password reset for my account (${cleanContact}) on The Surprise House. My verification code is ${code}.`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+
+    res.json({
+      status: 'success',
+      message: 'Password reset code generated!',
+      code,
+      contact: cleanContact,
+      whatsappUrl
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+// 10.6 RESET PASSWORD: Set new password with verified OTP
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { contact, code, newPassword } = req.body;
+    if (!contact || !code || !newPassword) {
+      return res.status(400).json({ status: 'error', message: 'Contact, verification code, and new password are required.' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ status: 'error', message: 'Password must be at least 6 characters long.' });
+    }
+
+    const cleanContact = contact.trim().toLowerCase();
+    const user = await db.users.findOneAsync({ contact: cleanContact });
+    if (!user) {
+      return res.status(404).json({ status: 'error', message: 'User not found.' });
+    }
+
+    if (!user.resetOtp || user.resetOtp !== code.trim()) {
+      return res.status(400).json({ status: 'error', message: 'Invalid verification code. Please check and try again.' });
+    }
+
+    if (Date.now() > (user.resetOtpExpires || 0)) {
+      return res.status(400).json({ status: 'error', message: 'Verification code has expired. Please request a new one.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+
+    await db.users.updateAsync(
+      { contact: cleanContact },
+      { $set: { passwordHash }, $unset: { resetOtp: true, resetOtpExpires: true } },
+      {}
+    );
+
+    res.json({
+      status: 'success',
+      message: 'Password reset successfully! 🌸 You can now log in.'
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
 // ==================== ORDER & TRACKING ROUTES ====================
 
 // 11. PLACE ORDER (Create a new customer order)

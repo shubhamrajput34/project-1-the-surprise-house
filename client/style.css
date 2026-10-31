@@ -474,6 +474,19 @@
   .auth-form input:focus { border-color: #d9578a; box-shadow: 0 0 0 4px rgba(217, 87, 138, 0.15); }
   .auth-form .pd-cart { justify-self: center; margin-top: 0.4rem; }
   .auth-error { color: #b4587f; font-style: italic; min-height: 1.2rem; font-weight: 300; }
+
+  .auth-extra-links { text-align: right; margin-top: -0.2rem; }
+  .auth-link-btn { background: none; border: none; color: #b4587f; font: inherit; font-size: 0.95rem; cursor: pointer; text-decoration: underline; padding: 0.2rem 0; }
+  .auth-link-btn:hover { color: #d9578a; }
+  .auth-back-btn { display: inline-block; justify-self: center; margin-top: 0.4rem; font-size: 0.95rem; }
+  .auth-otp-card { background: #fff7fa; border: 1.5px dashed #f3c4d4; border-radius: 18px; padding: 1.1rem 1.2rem; text-align: center; display: grid; gap: 0.4rem; }
+  .auth-otp-label { font-size: 0.95rem; color: #7a4a5e; margin: 0; }
+  .auth-otp-code { font-size: 2.2rem; font-weight: 600; letter-spacing: 0.2em; color: #d9578a; padding: 0.2rem 0; font-family: monospace, sans-serif; }
+  .auth-otp-hint { font-style: italic; font-size: 0.85rem; color: #9b7a88; margin: 0; }
+  .auth-wa-pill { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.4rem; padding: 0.55rem 1.1rem; border-radius: 999px; background: #25D366; color: #ffffff !important; text-decoration: none; font-size: 0.88rem; font-weight: 400; transition: background 0.3s ease; }
+  .auth-wa-pill:hover { background: #1da851; color: #ffffff !important; }
+  .ico-wa { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+
   .logout-link { background: none; border: none; color: #b4587f; font: inherit; font-weight: 300; cursor: pointer; margin: 0 0 2rem 1.2rem; text-decoration: underline; }
   .search-wrap { margin-top: 1.6rem; position: relative; }
   .search-wrap input { width: 100%; font: inherit; font-size: 1rem; color: #5a2a3d; background: #ffffff; border: 1.5px solid #f3c4d4; border-radius: 999px; padding: 0.85rem 1.2rem 0.85rem 2.8rem; outline: none; box-shadow: 0 8px 20px rgba(217, 87, 138, 0.08); }

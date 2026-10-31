@@ -195,13 +195,56 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
 
   function setAuthMode(mode) {
     authMode = mode;
-    document.querySelectorAll('.auth-tabs button').forEach((b) => b.classList.toggle('active', b.dataset.mode === mode));
-    const signup = mode === 'signup';
-    authName.hidden = !signup;
+    const isSignup = mode === 'signup';
+    const isLogin = mode === 'login';
+    const isForgot = mode === 'forgot';
+    const isReset = mode === 'reset';
+
+    const tabs = document.getElementById('auth-tabs');
+    if (tabs) tabs.hidden = isForgot || isReset;
+
+    document.querySelectorAll('.auth-tabs button').forEach((b) => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+
+    if (authForm) authForm.hidden = isForgot || isReset;
+    const forgotForm = document.getElementById('auth-forgot-form');
+    if (forgotForm) forgotForm.hidden = !isForgot;
+    const resetForm = document.getElementById('auth-reset-form');
+    if (resetForm) resetForm.hidden = !isReset;
+
+    const extraLinks = document.getElementById('auth-login-extra');
+    if (extraLinks) extraLinks.hidden = !isLogin;
+
+    authName.hidden = !isSignup;
     authName.required = false;
-    document.getElementById('auth-title').textContent = signup ? 'Create your account' : 'Welcome back';
-    document.getElementById('auth-submit').textContent = signup ? 'Create account' : 'Log in';
+
+    const titleEl = document.getElementById('auth-title');
+    const noteEl = document.getElementById('auth-note');
+
+    if (isSignup) {
+      if (titleEl) titleEl.textContent = 'Create your account';
+      if (noteEl) noteEl.textContent = 'Please create an account to continue.';
+      const submitBtn = document.getElementById('auth-submit');
+      if (submitBtn) submitBtn.textContent = 'Create account';
+    } else if (isLogin) {
+      if (titleEl) titleEl.textContent = 'Welcome back';
+      if (noteEl) noteEl.textContent = 'Log in to continue with your orders.';
+      const submitBtn = document.getElementById('auth-submit');
+      if (submitBtn) submitBtn.textContent = 'Log in';
+    } else if (isForgot) {
+      if (titleEl) titleEl.textContent = 'Reset your password';
+      if (noteEl) noteEl.textContent = 'Enter your registered phone number or email to receive a reset code.';
+    } else if (isReset) {
+      if (titleEl) titleEl.textContent = 'Enter verification code';
+      if (noteEl) noteEl.textContent = 'Use the verification code below to set your new password.';
+    }
+
     authError.textContent = '';
+    const forgotError = document.getElementById('auth-forgot-error');
+    if (forgotError) forgotError.textContent = '';
+    const resetError = document.getElementById('auth-reset-error');
+    if (resetError) resetError.textContent = '';
   }
 
   function openAuth(action, message) {
@@ -236,6 +279,126 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
   });
   document.getElementById('auth-close').addEventListener('click', closeAuth);
   authModal.addEventListener('click', (event) => { if (event.target === authModal) closeAuth(); });
+
+  const forgotLink = document.getElementById('auth-forgot-link');
+  if (forgotLink) {
+    forgotLink.addEventListener('click', () => {
+      const forgotContactEl = document.getElementById('auth-forgot-contact');
+      if (forgotContactEl && authContact.value) {
+        forgotContactEl.value = authContact.value.trim();
+      }
+      setAuthMode('forgot');
+      if (forgotContactEl) forgotContactEl.focus();
+    });
+  }
+
+  const forgotBack = document.getElementById('auth-forgot-back');
+  if (forgotBack) {
+    forgotBack.addEventListener('click', () => {
+      setAuthMode('login');
+      authContact.focus();
+    });
+  }
+
+  const resetBack = document.getElementById('auth-reset-back');
+  if (resetBack) {
+    resetBack.addEventListener('click', () => {
+      setAuthMode('login');
+      authContact.focus();
+    });
+  }
+
+  const forgotForm = document.getElementById('auth-forgot-form');
+  if (forgotForm) {
+    forgotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const forgotContactEl = document.getElementById('auth-forgot-contact');
+      const forgotErrorEl = document.getElementById('auth-forgot-error');
+      const submitBtn = document.getElementById('auth-forgot-submit');
+      const contactVal = normalise(forgotContactEl.value);
+
+      forgotErrorEl.textContent = '';
+      const origText = submitBtn.textContent;
+      submitBtn.textContent = 'Generating code...';
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contact: contactVal })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setAuthMode('reset');
+          document.getElementById('auth-otp-target').textContent = data.contact;
+          document.getElementById('auth-otp-display').textContent = data.code;
+          const waBtn = document.getElementById('auth-otp-wa');
+          if (waBtn) waBtn.href = data.whatsappUrl;
+          const resetCodeEl = document.getElementById('auth-reset-code');
+          if (resetCodeEl) resetCodeEl.value = data.code;
+          const newPassEl = document.getElementById('auth-reset-password');
+          if (newPassEl) {
+            newPassEl.value = '';
+            newPassEl.focus();
+          }
+        } else {
+          forgotErrorEl.textContent = data.message || 'Could not find registered account.';
+        }
+      } catch (err) {
+        console.error('Forgot password error:', err);
+        forgotErrorEl.textContent = 'Cannot reach server. Please try again.';
+      } finally {
+        submitBtn.textContent = origText;
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  const resetForm = document.getElementById('auth-reset-form');
+  if (resetForm) {
+    resetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const forgotContactEl = document.getElementById('auth-forgot-contact');
+      const resetCodeEl = document.getElementById('auth-reset-code');
+      const resetPassEl = document.getElementById('auth-reset-password');
+      const resetErrorEl = document.getElementById('auth-reset-error');
+      const submitBtn = document.getElementById('auth-reset-submit');
+
+      const contactVal = normalise(forgotContactEl.value);
+      const codeVal = resetCodeEl.value.trim();
+      const newPassword = resetPassEl.value;
+
+      resetErrorEl.textContent = '';
+      const origText = submitBtn.textContent;
+      submitBtn.textContent = 'Setting password...';
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contact: contactVal, code: codeVal, newPassword })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setAuthMode('login');
+          authContact.value = contactVal;
+          authPassword.value = '';
+          authNote.textContent = '🌸 Password changed! Please log in with your new password.';
+          authPassword.focus();
+        } else {
+          resetErrorEl.textContent = data.message || 'Password reset failed.';
+        }
+      } catch (err) {
+        console.error('Reset password error:', err);
+        resetErrorEl.textContent = 'Cannot reach server. Please try again.';
+      } finally {
+        submitBtn.textContent = origText;
+        submitBtn.disabled = false;
+      }
+    });
+  }
 
   authForm.addEventListener('submit', async (event) => {
     event.preventDefault();
