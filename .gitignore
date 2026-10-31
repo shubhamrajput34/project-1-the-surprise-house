@@ -1,0 +1,30 @@
+# Node dependencies
+node_modules/
+server/node_modules/
+
+# Local databases & logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary scratch & utility scripts
+*.py
+_*.js
+chk*.js
+fix*.js
+split*.js
+makefront.py
+look.py
+dreamcnt.py
+bothcheck.py
+t.js
+*.txt
+*.png
+!flower-cursor.png
+!client/**/*.png
+!client/**/*.jpg
+
+# Temporary test directories & configs
+client/supabase_test.html/
+public/
+firebase.json

@@ -286,6 +286,10 @@
 </main>
 
 <script>
+  const API_BASE = (location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname))
+    ? 'http://localhost:5000'
+    : location.origin;
+
   const picInput = document.getElementById('ideaPic');
   const preview = document.getElementById('preview');
 
@@ -323,7 +327,7 @@
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/customizations', {
+      const response = await fetch(`${API_BASE}/api/customizations`, {
         method: 'POST',
         body: formData
       });
@@ -341,7 +345,7 @@
       }
     } catch (error) {
       console.error('Submission failed:', error);
-      alert('Could not connect to the server. Please ensure the backend is running at http://localhost:5000');
+      alert('Could not connect to the server. Please ensure the backend is running.');
       submitBtn.textContent = originalBtnText;
       submitBtn.disabled = false;
     }

@@ -335,6 +335,10 @@
 <div id="toast" class="toast">Status updated! 🌸</div>
 
 <script>
+  const API_BASE = (location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname))
+    ? 'http://localhost:5000'
+    : location.origin;
+
   const ORDER_STATUS_LABELS = ['Placed', 'Packed', 'Out for delivery', 'Delivered'];
   const ORDER_BADGE_CLASSES = ['badge-placed', 'badge-packed', 'badge-shipped', 'badge-delivered'];
 
@@ -359,7 +363,7 @@
   async function loadDashboard() {
     try {
       // 1. Fetch Stats
-      const statsRes = await fetch('http://localhost:5000/api/admin/stats');
+      const statsRes = await fetch(`${API_BASE}/api/admin/stats`);
       if (statsRes.ok) {
         const stats = await statsRes.json();
         document.getElementById('stat-revenue').textContent = '₹' + (stats.totalRevenue || 0);
@@ -371,14 +375,14 @@
       }
 
       // 2. Fetch Orders
-      const ordersRes = await fetch('http://localhost:5000/api/orders/all');
+      const ordersRes = await fetch(`${API_BASE}/api/orders/all`);
       if (ordersRes.ok) {
         const data = await ordersRes.json();
         renderOrdersList(data.orders || []);
       }
 
       // 3. Fetch Customizations
-      const customsRes = await fetch('http://localhost:5000/api/customizations');
+      const customsRes = await fetch(`${API_BASE}/api/customizations`);
       if (customsRes.ok) {
         const data = await customsRes.json();
         renderCustomizationsList(data.data || []);
@@ -485,8 +489,8 @@
           <div class="info-block">
             <h4>Inspiration Photo</h4>
             ${c.imagePath ? `
-              <a href="http://localhost:5000${c.imagePath}" target="_blank" title="Click to view full photo">
-                <img src="http://localhost:5000${c.imagePath}" class="img-preview-thumb" alt="Client upload">
+              <a href="${API_BASE}${c.imagePath}" target="_blank" title="Click to view full photo">
+                <img src="${API_BASE}${c.imagePath}" class="img-preview-thumb" alt="Client upload">
               </a>
               <small style="display:block; margin-top:0.3rem; color:var(--muted);">Click image to expand</small>
             ` : '<p style="color:var(--muted); font-style:italic;">No photo uploaded</p>'}
@@ -499,7 +503,7 @@
   // Update order status live
   async function updateOrderStatus(orderId, newStatus) {
     try {
-      const res = await fetch(`http://localhost:5000/api/orders/${encodeURIComponent(orderId)}/status`, {
+      const res = await fetch(`${API_BASE}/api/orders/${encodeURIComponent(orderId)}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: parseInt(newStatus, 10) })

@@ -31,12 +31,12 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// 5.5 Serve Frontend Website (indexfront.html, customize.html, admin.html, images)
+// 5.5 Serve Frontend Website (index.html, customize.html, admin.html, images)
 app.use(express.static(path.join(__dirname, '../client')));
 
 // When visiting root http://localhost:5000, serve the main website directly!
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/indexfront.html'));
+  res.sendFile(path.join(__dirname, '../client/index.html'));
 });
 
 // 6. Test Route
