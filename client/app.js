@@ -127,22 +127,15 @@ document.querySelectorAll('.track img').forEach((img) => { const path = img.getA
 
   const productsSection = document.getElementById('products');
 
-const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories","quote":"Handmade personalised embroidered charm","image":"products/key-chain.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/key-chain.jpg"],"price":120},{"id":"bow","name":"Bow","category":"Bow","quote":"Artisan handcrafted hair bow","image":"products/bow.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/bow.jpg","products/bow-3.jpg","products/bow-4.jpg"],"variants":[{"name":"Bow","price":250},{"name":"Short tail","price":200},{"name":"Bow without tail","price":150}],"price":150},{"id":"huddie","name":"Huddie","category":"Clothing","quote":"Custom embroidered cozy hoodie","image":"products/huddie.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/huddie.jpg"],"price":799},{"id":"t-shirt","name":"T-shirt","category":"Clothing","quote":"Minimalist embroidered cotton t-shirt","image":"products/t-shirt.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/t-shirt.jpg","products/t-shirt-2.jpg","products/t-shirt-3.jpg","products/t-shirt-4.jpg"],"price":449},{"id":"cap","name":"Cap","category":"Clothing","quote":"Custom aesthetic embroidered cap","image":"products/cap.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/cap.jpg"],"price":249},{"id":"mobile-cover","name":"Mobile cover","category":"Accessories","quote":"Personalised floral mobile cover","image":"products/mobile-cover.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/mobile-cover.jpg","products/mobile-cover-2.jpg"],"price":299},{"id":"handmade-hoop-frame","name":"Handmade Hoop Frame","category":"Home Decor","quote":"Hand-embroidered floral hoop art","image":"products/handmade-hoop-frame.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/handmade-hoop-frame.jpg"],"price":499},{"id":"customize-hankey","name":"Customize hankey","category":"Gifts and Hampers","quote":"Personalised monogrammed handkerchief","image":"products/customize-hankey.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/customize-hankey.jpg"],"price":179},{"id":"customize-hampers","name":"Customize hampers","category":"Gifts and Hampers","quote":"Curated gift hamper for every celebration","image":"products/customize-hampers.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/customize-hampers.jpg"],"price":999,"items":["Candles","Mini diffuser","Dry flowers","Key tag","Scented sachet","Chocolate box","Photo frame","Customized mug","Scrunchie","Hair clip","Candle jar","Bath salts","Handwritten note card","Tiny teddy","Ribbon bow","Fairy lights (mini)"]},{"id":"handmade-rakhi","name":"Handmade Rakhi","category":"Accessories","quote":"Artisanal handcrafted floral rakhi","image":"","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":[],"price":129},{"id":"couple-customize-hamper","name":"Couple customize hamper","category":"Gifts and Hampers","quote":"Luxury curated hamper for special couples","image":"products/couple-customize-hamper.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/couple-customize-hamper.jpg"],"price":1499}];
+const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories","quote":"Handmade personalised embroidered charm","image":"products/key-chain.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/key-chain.jpg"],"price":250},{"id":"bow","name":"Bow","category":"Accessories","quote":"Artisan handcrafted hair bow","image":"products/bow.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/bow.jpg","products/bow-3.jpg","products/bow-4.jpg"],"variants":[{"name":"Normal bow","price":250,"image":"products/bow.jpg"},{"name":"Long bow tail","price":200,"image":"products/bow-3.jpg"},{"name":"Bow without tail","price":150,"image":"products/bow-4.jpg"}],"price":150},{"id":"huddie","name":"Huddie","category":"Clothing","quote":"Custom embroidered cozy hoodie","image":"products/huddie.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/huddie.jpg"],"price":null},{"id":"t-shirt","name":"T-shirt","category":"Clothing","quote":"Minimalist embroidered cotton t-shirt","image":"products/t-shirt.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/t-shirt.jpg","products/t-shirt-2.jpg","products/t-shirt-3.jpg","products/t-shirt-4.jpg"],"price":null},{"id":"cap","name":"Cap","category":"Clothing","quote":"Custom aesthetic embroidered cap","image":"products/cap.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/cap.jpg"],"price":500},{"id":"mobile-cover","name":"Mobile cover","category":"Accessories","quote":"Personalised floral mobile cover","image":"products/mobile-cover.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/mobile-cover.jpg","products/mobile-cover-2.jpg"],"price":null},{"id":"handmade-hoop-frame","name":"Handmade Hoop Frame","category":"Home Decor","quote":"Hand-embroidered floral hoop art","image":"products/handmade-hoop-frame.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/handmade-hoop-frame.jpg"],"price":null},{"id":"customize-hankey","name":"Customize hankey","category":"Gifts and Hampers","quote":"Personalised monogrammed handkerchief","image":"products/customize-hankey.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/customize-hankey.jpg"],"price":200},{"id":"customize-hampers","name":"Customize hampers","category":"Gifts and Hampers","quote":"Curated gift hamper for every celebration","image":"products/customize-hampers.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/customize-hampers.jpg"],"price":null,"items":["employetry item","Jwleyey item","beauty item","Hand written card","Eating chocolate"]},{"id":"handmade-rakhi","name":"Handmade Rakhi","category":"Accessories","quote":"Artisanal handcrafted floral rakhi","image":"","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":[],"price":null},{"id":"couple-customize-hamper","name":"Couple customize hamper","category":"Gifts and Hampers","quote":"Luxury curated hamper for special couples","image":"products/couple-customize-hamper.jpg","design":"To be added.","colors":[],"materials":[],"process":[],"reviews":[],"gallery":["products/couple-customize-hamper.jpg"],"price":null}];
 
   const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
   const CARD_META = {
-    'key-chain': { rating: 4.8, reviews: 126, mrp: 399, price: 249 },
-    'bow': { rating: 4.9, reviews: 84, mrp: 349, price: 199 },
-    'huddie': { rating: 4.7, reviews: 58, mrp: 1299, price: 899 },
-    't-shirt': { rating: 4.8, reviews: 73, mrp: 799, price: 549 },
-    'cap': { rating: 4.6, reviews: 41, mrp: 499, price: 349 },
-    'mobile-cover': { rating: 4.7, reviews: 62, mrp: 599, price: 399 },
-    'handmade-hoop-frame': { rating: 4.9, reviews: 37, mrp: 999, price: 699 },
-    'customize-hankey': { rating: 4.8, reviews: 29, mrp: 449, price: 299 },
-    'customize-hampers': { rating: 4.9, reviews: 51, mrp: 1499, price: 1099 },
-    'handmade-rakhi': { rating: 4.8, reviews: 46, mrp: 299, price: 199 },
-    'couple-customize-hamper': { rating: 4.9, reviews: 34, mrp: 1999, price: 1499 }
+    'key-chain': { price: 250 },
+    'bow': { price: 'From ₹150' },
+    'cap': { price: 500 },
+    'customize-hankey': { price: 200 }
   };
   const cardMoney = (value) => SHOP.currencySymbol + Number(value).toLocaleString('en-IN');
   const cartIcon = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L22 7H6"/></svg>';
@@ -154,30 +147,22 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
     const frag = document.createDocumentFragment();
     PRODUCTS.forEach((pr) => {
       const meta = CARD_META[pr.id] || {};
-      const price = pr.price != null ? pr.price : (meta.price != null ? meta.price : null);
-      const mrp = price != null && meta.mrp != null && meta.mrp > price ? meta.mrp : null;
-      const rating = meta.rating != null ? Number(meta.rating).toFixed(1) : null;
-      const discount = mrp != null ? Math.round(((mrp - price) / mrp) * 100) : null;
+      const price = meta.price !== undefined ? meta.price : (pr.price != null ? pr.price : null);
       const image = pr.image ? imgSrc(pr.image) : '';
       const card = document.createElement('div');
       card.className = 'card card-link';
       card.dataset.id = pr.id;
       card.style.setProperty('--c', '#fbd5e1');
+      const priceDisplay = price != null ? (typeof price === 'string' ? esc(price) : cardMoney(price)) : 'Price on request';
       card.innerHTML = `
         <a class="card-open" href="#product/${esc(pr.id)}">
           ${image ? `<img src="${image}" alt="${esc(pr.name)}" loading="lazy">` : `<div class="card-photo-placeholder" aria-hidden="true">${esc(pr.name)}</div>`}
           <div class="card-text">
             <h3>${esc(pr.name)}</h3>
-            <div class="card-rating">
-              ${rating != null ? `<span class="card-star" aria-hidden="true">\u2605</span><span>${rating}</span>` : ''}
-              ${meta.reviews != null ? `<span class="card-reviews">(${meta.reviews})</span>` : ''}
-            </div>
             <div class="card-prices">
-              ${mrp != null ? `<span class="card-mrp">${cardMoney(mrp)}</span>` : ''}
-              <span class="card-price">${price != null ? cardMoney(price) : 'Price on request'}</span>
-              ${discount != null ? `<span class="card-offer">${discount}% off</span>` : ''}
+              <span class="card-price">${priceDisplay}</span>
             </div>
-            <p class="card-offer-text">${mrp != null ? `Save ${cardMoney(mrp - price)}` : 'Handmade to order'}</p>
+            <p class="card-offer-text">Handmade to order</p>
           </div>
         </a>
         <button class="card-add" type="button" data-id="${esc(pr.id)}">${cartIcon}<span>Add</span></button>
@@ -382,9 +367,30 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
   const money = (value) => `${SHOP.currencySymbol}${Number(value).toLocaleString('en-IN')}`;
   const showMoney = (value) => (value == null ? 'To be confirmed' : money(value));
 
+  function itemPriceInfo(item) {
+    const pr = productOf(item.id);
+    if (!pr) return { price: null, display: 'To be confirmed' };
+    if (item.variant && pr.variants) {
+      const v = pr.variants.find((x) => x.name === item.variant || (x.name === 'Long bow tail' && item.variant === 'Short bow') || (x.name === 'Short bow' && item.variant === 'Long bow tail'));
+      if (v) {
+        if (v.price != null && typeof v.price === 'number') {
+          return { price: v.price, display: money(v.price) };
+        }
+        return { price: null, display: 'To be confirmed' };
+      }
+    }
+    if (pr.price != null && typeof pr.price === 'number') {
+      return { price: pr.price, display: money(pr.price) };
+    }
+    return { price: null, display: 'To be confirmed' };
+  }
+
   function billTotals(items) {
-    const allPriced = items.every((it) => productOf(it.id).price != null);
-    const subtotal = items.reduce((sum, it) => sum + (productOf(it.id).price || 0) * it.qty, 0);
+    const allPriced = items.length > 0 && items.every((it) => itemPriceInfo(it).price != null);
+    const subtotal = items.reduce((sum, it) => {
+      const p = itemPriceInfo(it).price;
+      return sum + (p != null ? p : 0) * it.qty;
+    }, 0);
     const fee = SHOP.deliveryFee;
     const total = allPriced && fee != null ? subtotal + fee : null;
     return { count: items.reduce((sum, it) => sum + it.qty, 0), allPriced, subtotal, fee, total };
@@ -432,12 +438,14 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
     document.getElementById('cart-title').textContent = checkoutMode ? 'Checkout' : 'My cart';
     box.innerHTML = items.map((item, i) => {
       const pr = productOf(item.id);
+      const info = itemPriceInfo(item);
+      const title = item.variant ? `${pr.name} (${item.variant})` : pr.name;
       return `
       <div class="wl-card cart-item">
         <img src="${esc(imgSrc(pr.image))}" alt="${esc(pr.name)}" onerror="this.style.display='none'">
         <div class="wl-card-body">
-          <h3>${esc(pr.name)}</h3>
-          <p class="cart-price">Price: ${showMoney(pr.price)}</p>
+          <h3>${esc(title)}</h3>
+          <p class="cart-price">Price: ${esc(info.display)}</p>
           <div class="qty">
             <button type="button" data-qty-change="${i}" data-delta="-1" aria-label="Decrease quantity">&minus;</button>
             <span>${item.qty}</span>
@@ -840,18 +848,66 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
     const materials = (pr.materials || []).map((m) => `<li>${esc(m)}</li>`).join('');
     const steps = (pr.process || []).map((m) => `<li>${esc(m)}</li>`).join('');
     const reviews = (pr.reviews || []).map(([who, stars, text]) => `<div class="pd-review"><strong>${esc(who)}</strong><span class="pd-stars">${'★'.repeat(Number(stars))}</span><p>${esc(text)}</p></div>`).join('');
+    let currentPriceText = '';
+    let defaultImg = (pr.gallery && pr.gallery[0]) || pr.image || '';
+    if (pr.variants && pr.variants.length) {
+      const defaultVariant = pr.variants[0];
+      currentPriceText = defaultVariant.displayPrice || (defaultVariant.price != null ? cardMoney(defaultVariant.price) : 'To be confirmed');
+      if (defaultVariant.image) defaultImg = defaultVariant.image;
+    } else if (pr.price != null) {
+      currentPriceText = cardMoney(pr.price);
+    }
+    const titlePriceHtml = currentPriceText ? ` <span class="pd-title-price" id="pd-price">${esc(currentPriceText)}</span>` : '';
+
+    const hasVariantImages = pr.variants && pr.variants.some((v) => v.image);
+    const photoHtml = hasVariantImages
+      ? `<img id="pd-main-img" src="${esc(imgSrc(defaultImg))}" alt="${esc(pr.name)}" onerror="this.style.display='none'">`
+      : (pr.gallery && pr.gallery.length
+          ? pr.gallery.map((src) => `<img src="${esc(imgSrc(src))}" alt="${esc(pr.name)}" onerror="this.style.display='none'">`).join('')
+          : '<p class="pd-nopic">Picture to be added.</p>');
+
     box.innerHTML = `
-      <div class="pd-photo">${pr.gallery && pr.gallery.length ? pr.gallery.map((src) => `<img src="${esc(imgSrc(src))}" alt="${esc(pr.name)}" onerror="this.style.display='none'">`).join('') : '<p class="pd-nopic">Picture to be added.</p>'}
+      <div class="pd-photo">${photoHtml}
         <button class="pd-heart pd-wish" type="button" data-id="${esc(pr.id)}" aria-label="${esc(wishLabel(pr.id))}" title="${esc(wishLabel(pr.id))}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></button></div>
       <div>
         <p class="pd-cat">${esc(pr.category)}</p>
-        <h1 class="pd-title">${esc(pr.name)}</h1>
+        <h1 class="pd-title">${esc(pr.name)}${titlePriceHtml}</h1>
+        ${pr.id === 'customize-hampers' ? '<p class="pd-start-price">Starting from ₹1600</p>' : ''}
         <p class="pd-quote">${esc(pr.quote)}</p>
         ${pr.design ? `<div class="pd-block"><h2>About the design</h2><p>${esc(pr.design)}</p></div>` : ''}
+        ${pr.id === 'customize-hampers' ? `
+          <div class="pd-block pd-what-to-add">
+            <h2>What you can add</h2>
+            <!-- Item prices can be added later (e.g. { name: 'employetry item', price: ... }) -->
+            <ol>
+              <li>employetry item</li>
+              <li>Jwleyey item</li>
+              <li>beauty item</li>
+              <li>Hand written card</li>
+              <li>Eating chocolate</li>
+            </ol>
+          </div>
+        ` : ''}
         ${swatches ? `<div class="pd-block"><h2>Colours</h2><div class="pd-swatches">${swatches}</div></div>` : ''}
         ${materials ? `<div class="pd-block"><h2>Raw materials</h2><ul>${materials}</ul></div>` : ''}
         ${steps ? `<div class="pd-block"><h2>How it is made</h2><ol>${steps}</ol></div>` : ''}
         ${reviews ? `<div class="pd-block"><h2>Reviews</h2>${reviews}</div>` : ''}
+        ${pr.variants && pr.variants.length ? `
+          <fieldset class="pd-variants">
+            <legend class="pd-variants-title">${pr.id === 'cap' ? 'Size' : 'Variant'}</legend>
+            <div class="pd-variants-list">
+              ${pr.variants.map((v, idx) => {
+                const disp = v.displayPrice || (v.price != null ? cardMoney(v.price) : 'To be confirmed');
+                return `
+                <label class="pd-variant-option">
+                  <input type="radio" name="pd-variant" value="${esc(v.name)}" data-display="${esc(disp)}" data-image="${esc(v.image || '')}" ${idx === 0 ? 'checked' : ''}>
+                  <span>${esc(v.name)} <span class="pd-variant-price">(${esc(disp)})</span></span>
+                </label>
+              `;
+              }).join('')}
+            </div>
+          </fieldset>
+        ` : ''}
         <div class="pd-buybar">
           <button class="pd-add" type="button" data-id="${esc(pr.id)}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L22 7H6"/></svg><span>Add to cart</span></button>
           <button class="pd-buy" type="button" data-id="${esc(pr.id)}"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg><span>Buy now</span></button>
@@ -865,18 +921,31 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
   const cartKey = () => (currentUser() ? 'sh_cart_' + currentUser().contact : null);
   const CHECKOUT_KEY = () => (currentUser() ? 'sh_checkout_' + currentUser().contact : null);
   let checkoutMode = false;
-  const normaliseItem = (x) => (typeof x === 'string' ? { id: x, note: '', qty: 1 } : { id: x.id, note: x.note || '', qty: x.qty || 1 });
+  const normaliseItem = (x) => {
+    if (typeof x === 'string') return { id: x, variant: null, note: '', qty: 1 };
+    return {
+      id: x.id,
+      variant: x.variant || null,
+      note: x.note || '',
+      qty: x.qty || 1
+    };
+  };
   const getCart = () => (cartKey() ? JSON.parse(store.get(cartKey()) || '[]').map(normaliseItem) : []);
   const saveCart = (items) => store.set(cartKey(), JSON.stringify(items));
   const activeItems = () => (checkoutMode ? JSON.parse(store.get(CHECKOUT_KEY()) || '[]').map(normaliseItem) : getCart());
   const saveActiveItems = (items) => (checkoutMode ? store.set(CHECKOUT_KEY(), JSON.stringify(items)) : saveCart(items));
   const cartCount = () => getCart().reduce((sum, item) => sum + item.qty, 0);
 
-  function addItem(id, note = '') {
+  function addItem(id, note = '', variant = null) {
     const list = getCart();
-    const existing = list.find((item) => item.id === id);
-    if (existing) existing.qty += 1;
-    else list.push({ id, note, qty: 1 });
+    const existing = list.find((item) => item.id === id && (item.variant || null) === (variant || null));
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      const item = { id, qty: 1, note };
+      if (variant) item.variant = variant;
+      list.push(item);
+    }
     saveCart(list);
   }
 
@@ -886,7 +955,13 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
   }
 
   function addToCart(button) {
-    addItem(button.dataset.id);
+    const pr = productOf(button.dataset.id);
+    let selectedVariant = null;
+    if (pr && pr.variants && pr.variants.length) {
+      const checked = document.querySelector('input[name="pd-variant"]:checked');
+      selectedVariant = checked ? checked.value : pr.variants[0].name;
+    }
+    addItem(button.dataset.id, '', selectedVariant);
     button.classList.add('added');
     button.querySelector('span').textContent = 'Added to cart';
     updateCartStatus();
@@ -906,7 +981,15 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
     if (buyButton) {
       // Buy now: only this product goes to checkout, the cart is not changed
       requireAccount(() => {
-        store.set(CHECKOUT_KEY(), JSON.stringify([{ id: buyButton.dataset.id, note: '', qty: 1 }]));
+        const pr = productOf(buyButton.dataset.id);
+        let selectedVariant = null;
+        if (pr && pr.variants && pr.variants.length) {
+          const checked = document.querySelector('input[name="pd-variant"]:checked');
+          selectedVariant = checked ? checked.value : pr.variants[0].name;
+        }
+        const item = { id: buyButton.dataset.id, qty: 1, note: '' };
+        if (selectedVariant) item.variant = selectedVariant;
+        store.set(CHECKOUT_KEY(), JSON.stringify([item]));
         location.hash = '#checkout';
       }, 'Create an account to buy this product.');
     }
@@ -943,6 +1026,19 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
     closeDrawer();
     window.scrollTo(0, 0);
   }
+  
+  document.getElementById('pd-content').addEventListener('change', (event) => {
+    if (event.target.name === 'pd-variant') {
+      const display = event.target.dataset.display;
+      const priceEl = document.getElementById('pd-price');
+      if (priceEl && display) priceEl.textContent = display;
+      const imgPath = event.target.dataset.image;
+      if (imgPath) {
+        const photo = document.getElementById('pd-main-img') || document.querySelector('.pd-photo img');
+        if (photo) photo.src = imgSrc(imgPath);
+      }
+    }
+  });
   window.addEventListener('hashchange', showRoute);
   showRoute();
 
