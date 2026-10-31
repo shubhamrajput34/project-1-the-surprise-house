@@ -176,84 +176,89 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
   const customizeView = document.getElementById('customize-view');
   const productView = document.getElementById('product-view');
 
-  // ---------- Accounts: customers must sign up or log in before cart, customization or ordering ----------
+    // ---------- Accounts: customers must sign up or log in before cart, customization or ordering ----------
   const USERS_KEY = 'sh_users';
   const CURRENT_KEY = 'sh_current_user';
   const authModal = document.getElementById('auth-modal');
-  const authForm = document.getElementById('auth-form');
-  const authName = document.getElementById('auth-name');
-  const authContact = document.getElementById('auth-contact');
-  const authPassword = document.getElementById('auth-password');
-  const authError = document.getElementById('auth-error');
-  const authNote = document.getElementById('auth-note');
   let authMode = 'signup';
   let pendingAction = null;
 
-  const getUsers = () => JSON.parse(store.get(USERS_KEY) || '[]');
+  function cleanPhone(val) {
+    if (!val) return '';
+    let cleaned = val.toString().replace(/[\s\-\(\)]/g, '').trim();
+    if (cleaned.startsWith('+91')) cleaned = cleaned.slice(3);
+    else if (cleaned.startsWith('91') && cleaned.length === 12) cleaned = cleaned.slice(2);
+    else if (cleaned.startsWith('0') && cleaned.length === 11) cleaned = cleaned.slice(1);
+    return cleaned;
+  }
+
   const currentUser = () => JSON.parse(store.get(CURRENT_KEY) || 'null');
-  const normalise = (value) => value.trim().toLowerCase();
 
   function setAuthMode(mode) {
     authMode = mode;
-    const isSignup = mode === 'signup';
+    const isSignup1 = mode === 'signup';
+    const isSignup2 = mode === 'signup_step2';
     const isLogin = mode === 'login';
     const isForgot = mode === 'forgot';
     const isReset = mode === 'reset';
 
     const tabs = document.getElementById('auth-tabs');
-    if (tabs) tabs.hidden = isForgot || isReset;
+    if (tabs) tabs.hidden = isSignup2 || isForgot || isReset;
 
     document.querySelectorAll('.auth-tabs button').forEach((b) => {
-      b.classList.toggle('active', b.dataset.mode === mode);
+      b.classList.toggle('active', (b.dataset.mode === 'signup' && (isSignup1 || isSignup2)) || (b.dataset.mode === 'login' && isLogin));
     });
 
-    if (authForm) authForm.hidden = isForgot || isReset;
-    const forgotForm = document.getElementById('auth-forgot-form');
-    if (forgotForm) forgotForm.hidden = !isForgot;
-    const resetForm = document.getElementById('auth-reset-form');
-    if (resetForm) resetForm.hidden = !isReset;
+    const fSignup1 = document.getElementById('auth-signup-step1-form');
+    if (fSignup1) fSignup1.hidden = !isSignup1;
 
-    const extraLinks = document.getElementById('auth-login-extra');
-    if (extraLinks) extraLinks.hidden = !isLogin;
+    const fSignup2 = document.getElementById('auth-signup-step2-form');
+    if (fSignup2) fSignup2.hidden = !isSignup2;
 
-    authName.hidden = !isSignup;
-    authName.required = false;
+    const fLogin = document.getElementById('auth-login-form');
+    if (fLogin) fLogin.hidden = !isLogin;
+
+    const fForgot = document.getElementById('auth-forgot-form');
+    if (fForgot) fForgot.hidden = !isForgot;
+
+    const fReset = document.getElementById('auth-reset-form');
+    if (fReset) fReset.hidden = !isReset;
 
     const titleEl = document.getElementById('auth-title');
     const noteEl = document.getElementById('auth-note');
 
-    if (isSignup) {
+    if (isSignup1) {
       if (titleEl) titleEl.textContent = 'Create your account';
-      if (noteEl) noteEl.textContent = 'Please create an account to continue.';
-      const submitBtn = document.getElementById('auth-submit');
-      if (submitBtn) submitBtn.textContent = 'Create account';
+      if (noteEl) noteEl.textContent = 'Enter your name and phone number to get started.';
+    } else if (isSignup2) {
+      if (titleEl) titleEl.textContent = 'Verify phone number';
+      if (noteEl) noteEl.textContent = 'We sent a 6-digit verification code for your number.';
     } else if (isLogin) {
       if (titleEl) titleEl.textContent = 'Welcome back';
-      if (noteEl) noteEl.textContent = 'Log in to continue with your orders.';
-      const submitBtn = document.getElementById('auth-submit');
-      if (submitBtn) submitBtn.textContent = 'Log in';
+      if (noteEl) noteEl.textContent = 'Log in with your phone number and password.';
     } else if (isForgot) {
-      if (titleEl) titleEl.textContent = 'Reset your password';
-      if (noteEl) noteEl.textContent = 'Enter your registered phone number or email to receive a reset code.';
+      if (titleEl) titleEl.textContent = 'Forgot password?';
+      if (noteEl) noteEl.textContent = 'Enter your registered phone number to receive a verification code.';
     } else if (isReset) {
-      if (titleEl) titleEl.textContent = 'Enter verification code';
-      if (noteEl) noteEl.textContent = 'Use the verification code below to set your new password.';
+      if (titleEl) titleEl.textContent = 'Reset your password';
+      if (noteEl) noteEl.textContent = 'Enter the verification code and your new password.';
     }
 
-    authError.textContent = '';
-    const forgotError = document.getElementById('auth-forgot-error');
-    if (forgotError) forgotError.textContent = '';
-    const resetError = document.getElementById('auth-reset-error');
-    if (resetError) resetError.textContent = '';
+    // Clear error messages
+    ['auth-signup-error1', 'auth-signup-error2', 'auth-login-error', 'auth-forgot-error', 'auth-reset-error'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '';
+    });
   }
 
   function openAuth(action, message) {
     pendingAction = action;
-    authNote.textContent = message || 'Please create an account to continue.';
     setAuthMode('signup');
-    authForm.reset();
+    const noteEl = document.getElementById('auth-note');
+    if (noteEl) noteEl.textContent = message || 'Enter your name and phone number to get started.';
     authModal.hidden = false;
-    authName.focus();
+    const nameInput = document.getElementById('auth-signup-name');
+    if (nameInput) nameInput.focus();
   }
 
   function closeAuth() {
@@ -274,80 +279,62 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
     if (typeof updateDrawer === 'function') updateDrawer();
   }
 
+  // Tab switching
   document.querySelectorAll('.auth-tabs button').forEach((b) => {
     b.addEventListener('click', () => setAuthMode(b.dataset.mode));
   });
-  document.getElementById('auth-close').addEventListener('click', closeAuth);
+
+  const closeBtn = document.getElementById('auth-close');
+  if (closeBtn) closeBtn.addEventListener('click', closeAuth);
   authModal.addEventListener('click', (event) => { if (event.target === authModal) closeAuth(); });
 
-  const forgotLink = document.getElementById('auth-forgot-link');
-  if (forgotLink) {
-    forgotLink.addEventListener('click', () => {
-      const forgotContactEl = document.getElementById('auth-forgot-contact');
-      if (forgotContactEl && authContact.value) {
-        forgotContactEl.value = authContact.value.trim();
-      }
-      setAuthMode('forgot');
-      if (forgotContactEl) forgotContactEl.focus();
-    });
-  }
-
-  const forgotBack = document.getElementById('auth-forgot-back');
-  if (forgotBack) {
-    forgotBack.addEventListener('click', () => {
-      setAuthMode('login');
-      authContact.focus();
-    });
-  }
-
-  const resetBack = document.getElementById('auth-reset-back');
-  if (resetBack) {
-    resetBack.addEventListener('click', () => {
-      setAuthMode('login');
-      authContact.focus();
-    });
-  }
-
-  const forgotForm = document.getElementById('auth-forgot-form');
-  if (forgotForm) {
-    forgotForm.addEventListener('submit', async (e) => {
+  // 1. SIGNUP STEP 1: Request Code
+  const signupStep1 = document.getElementById('auth-signup-step1-form');
+  if (signupStep1) {
+    signupStep1.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const forgotContactEl = document.getElementById('auth-forgot-contact');
-      const forgotErrorEl = document.getElementById('auth-forgot-error');
-      const submitBtn = document.getElementById('auth-forgot-submit');
-      const contactVal = normalise(forgotContactEl.value);
+      const name = document.getElementById('auth-signup-name').value.trim();
+      const rawPhone = document.getElementById('auth-signup-phone').value;
+      const phone = cleanPhone(rawPhone);
+      const errEl = document.getElementById('auth-signup-error1');
+      const submitBtn = document.getElementById('auth-signup-submit1');
 
-      forgotErrorEl.textContent = '';
+      errEl.textContent = '';
+      if (!/^\d{10}$/.test(phone)) {
+        errEl.textContent = 'Please enter a valid 10-digit mobile number.';
+        return;
+      }
+
       const origText = submitBtn.textContent;
-      submitBtn.textContent = 'Generating code...';
+      submitBtn.textContent = 'Sending code...';
       submitBtn.disabled = true;
 
       try {
-        const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+        const res = await fetch(`${API_BASE}/api/auth/send-register-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contact: contactVal })
+          body: JSON.stringify({ name, phone })
         });
         const data = await res.json();
         if (res.ok) {
-          setAuthMode('reset');
-          document.getElementById('auth-otp-target').textContent = data.contact;
-          document.getElementById('auth-otp-display').textContent = data.code;
-          const waBtn = document.getElementById('auth-otp-wa');
-          if (waBtn) waBtn.href = data.whatsappUrl;
-          const resetCodeEl = document.getElementById('auth-reset-code');
-          if (resetCodeEl) resetCodeEl.value = data.code;
-          const newPassEl = document.getElementById('auth-reset-password');
-          if (newPassEl) {
-            newPassEl.value = '';
-            newPassEl.focus();
+          setAuthMode('signup_step2');
+          document.getElementById('auth-signup-otp-target').textContent = data.phone;
+          document.getElementById('auth-signup-otp-display').textContent = data.code;
+          const waLink = document.getElementById('auth-signup-otp-wa');
+          if (waLink) waLink.href = data.whatsappUrl;
+          const codeInput = document.getElementById('auth-signup-code');
+          if (codeInput) codeInput.value = data.code;
+          const passInput = document.getElementById('auth-signup-password');
+          if (passInput) {
+            passInput.value = '';
+            passInput.focus();
           }
         } else {
-          forgotErrorEl.textContent = data.message || 'Could not find registered account.';
+          errEl.textContent = data.message || 'Could not send verification code.';
         }
       } catch (err) {
-        console.error('Forgot password error:', err);
-        forgotErrorEl.textContent = 'Cannot reach server. Please try again.';
+        console.error('Send code error:', err);
+        errEl.textContent = 'Cannot reach server. Please check your connection.';
       } finally {
         submitBtn.textContent = origText;
         submitBtn.disabled = false;
@@ -355,21 +342,216 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
     });
   }
 
+  // 1.1 SIGNUP STEP 2: Back to Step 1
+  const signupBack = document.getElementById('auth-signup-back');
+  if (signupBack) {
+    signupBack.addEventListener('click', () => {
+      setAuthMode('signup');
+      const phoneInput = document.getElementById('auth-signup-phone');
+      if (phoneInput) phoneInput.focus();
+    });
+  }
+
+  // 1.2 SIGNUP STEP 2: Verify & Create Account
+  const signupStep2 = document.getElementById('auth-signup-step2-form');
+  if (signupStep2) {
+    signupStep2.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('auth-signup-name').value.trim();
+      const phone = cleanPhone(document.getElementById('auth-signup-phone').value);
+      const code = document.getElementById('auth-signup-code').value.trim();
+      const password = document.getElementById('auth-signup-password').value;
+      const errEl = document.getElementById('auth-signup-error2');
+      const submitBtn = document.getElementById('auth-signup-submit2');
+
+      errEl.textContent = '';
+      if (password.length < 6) {
+        errEl.textContent = 'Password must be at least 6 characters.';
+        return;
+      }
+
+      const origText = submitBtn.textContent;
+      submitBtn.textContent = 'Creating account...';
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, phone, code, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          store.set(CURRENT_KEY, JSON.stringify(data.user));
+          if (data.token) store.set('sh_token', data.token);
+          const act = pendingAction;
+          closeAuth();
+          updateLogoutLinks();
+          if (act) act();
+        } else {
+          errEl.textContent = data.message || 'Registration failed.';
+        }
+      } catch (err) {
+        console.error('Register error:', err);
+        errEl.textContent = 'Cannot reach server. Please try again.';
+      } finally {
+        submitBtn.textContent = origText;
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  // 2. LOGIN: Phone + Password
+  const loginForm = document.getElementById('auth-login-form');
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rawPhone = document.getElementById('auth-login-phone').value;
+      const phone = cleanPhone(rawPhone);
+      const password = document.getElementById('auth-login-password').value;
+      const errEl = document.getElementById('auth-login-error');
+      const submitBtn = document.getElementById('auth-login-submit');
+
+      errEl.textContent = '';
+      if (!/^\d{10}$/.test(phone)) {
+        errEl.textContent = 'Please enter a valid 10-digit mobile number.';
+        return;
+      }
+
+      const origText = submitBtn.textContent;
+      submitBtn.textContent = 'Logging in...';
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          store.set(CURRENT_KEY, JSON.stringify(data.user));
+          if (data.token) store.set('sh_token', data.token);
+          const act = pendingAction;
+          closeAuth();
+          updateLogoutLinks();
+          if (act) act();
+        } else {
+          errEl.textContent = data.message || 'Login failed. Please check phone and password.';
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        errEl.textContent = 'Cannot reach server. Please try again.';
+      } finally {
+        submitBtn.textContent = origText;
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  // 3. FORGOT PASSWORD: Open Step 1
+  const forgotLink = document.getElementById('auth-forgot-link');
+  if (forgotLink) {
+    forgotLink.addEventListener('click', () => {
+      const loginPhone = document.getElementById('auth-login-phone');
+      const forgotPhone = document.getElementById('auth-forgot-phone');
+      if (loginPhone && forgotPhone && loginPhone.value) {
+        forgotPhone.value = loginPhone.value.trim();
+      }
+      setAuthMode('forgot');
+      if (forgotPhone) forgotPhone.focus();
+    });
+  }
+
+  const forgotBack = document.getElementById('auth-forgot-back');
+  if (forgotBack) {
+    forgotBack.addEventListener('click', () => {
+      setAuthMode('login');
+      const loginPhone = document.getElementById('auth-login-phone');
+      if (loginPhone) loginPhone.focus();
+    });
+  }
+
+  // 3.1 FORGOT PASSWORD: Send Code
+  const forgotForm = document.getElementById('auth-forgot-form');
+  if (forgotForm) {
+    forgotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rawPhone = document.getElementById('auth-forgot-phone').value;
+      const phone = cleanPhone(rawPhone);
+      const errEl = document.getElementById('auth-forgot-error');
+      const submitBtn = document.getElementById('auth-forgot-submit');
+
+      errEl.textContent = '';
+      if (!/^\d{10}$/.test(phone)) {
+        errEl.textContent = 'Please enter a valid 10-digit mobile number.';
+        return;
+      }
+
+      const origText = submitBtn.textContent;
+      submitBtn.textContent = 'Sending code...';
+      submitBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setAuthMode('reset');
+          document.getElementById('auth-reset-otp-target').textContent = data.phone;
+          document.getElementById('auth-reset-otp-display').textContent = data.code;
+          const waLink = document.getElementById('auth-reset-otp-wa');
+          if (waLink) waLink.href = data.whatsappUrl;
+          const codeInput = document.getElementById('auth-reset-code');
+          if (codeInput) codeInput.value = data.code;
+          const passInput = document.getElementById('auth-reset-password');
+          if (passInput) {
+            passInput.value = '';
+            passInput.focus();
+          }
+        } else {
+          errEl.textContent = data.message || 'No account found with this phone number.';
+        }
+      } catch (err) {
+        console.error('Forgot password error:', err);
+        errEl.textContent = 'Cannot reach server. Please try again.';
+      } finally {
+        submitBtn.textContent = origText;
+        submitBtn.disabled = false;
+      }
+    });
+  }
+
+  // 4. RESET PASSWORD: Back to Login
+  const resetBack = document.getElementById('auth-reset-back');
+  if (resetBack) {
+    resetBack.addEventListener('click', () => {
+      setAuthMode('login');
+      const loginPhone = document.getElementById('auth-login-phone');
+      if (loginPhone) loginPhone.focus();
+    });
+  }
+
+  // 4.1 RESET PASSWORD: Verify Code & Set New Password
   const resetForm = document.getElementById('auth-reset-form');
   if (resetForm) {
     resetForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const forgotContactEl = document.getElementById('auth-forgot-contact');
-      const resetCodeEl = document.getElementById('auth-reset-code');
-      const resetPassEl = document.getElementById('auth-reset-password');
-      const resetErrorEl = document.getElementById('auth-reset-error');
+      const phone = cleanPhone(document.getElementById('auth-forgot-phone').value);
+      const code = document.getElementById('auth-reset-code').value.trim();
+      const newPassword = document.getElementById('auth-reset-password').value;
+      const errEl = document.getElementById('auth-reset-error');
       const submitBtn = document.getElementById('auth-reset-submit');
 
-      const contactVal = normalise(forgotContactEl.value);
-      const codeVal = resetCodeEl.value.trim();
-      const newPassword = resetPassEl.value;
+      errEl.textContent = '';
+      if (newPassword.length < 6) {
+        errEl.textContent = 'Password must be at least 6 characters.';
+        return;
+      }
 
-      resetErrorEl.textContent = '';
       const origText = submitBtn.textContent;
       submitBtn.textContent = 'Setting password...';
       submitBtn.disabled = true;
@@ -378,75 +560,32 @@ const PRODUCTS = [{"id":"key-chain","name":"Key chain","category":"Accessories",
         const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contact: contactVal, code: codeVal, newPassword })
+          body: JSON.stringify({ phone, code, newPassword })
         });
         const data = await res.json();
         if (res.ok) {
           setAuthMode('login');
-          authContact.value = contactVal;
-          authPassword.value = '';
-          authNote.textContent = '🌸 Password changed! Please log in with your new password.';
-          authPassword.focus();
+          const loginPhone = document.getElementById('auth-login-phone');
+          if (loginPhone) loginPhone.value = phone;
+          const loginPass = document.getElementById('auth-login-password');
+          if (loginPass) {
+            loginPass.value = '';
+            loginPass.focus();
+          }
+          const noteEl = document.getElementById('auth-note');
+          if (noteEl) noteEl.textContent = '🌸 Password changed! Please log in with your new password.';
         } else {
-          resetErrorEl.textContent = data.message || 'Password reset failed.';
+          errEl.textContent = data.message || 'Password reset failed.';
         }
       } catch (err) {
         console.error('Reset password error:', err);
-        resetErrorEl.textContent = 'Cannot reach server. Please try again.';
+        errEl.textContent = 'Cannot reach server. Please try again.';
       } finally {
         submitBtn.textContent = origText;
         submitBtn.disabled = false;
       }
     });
   }
-
-  authForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const contact = normalise(authContact.value);
-    const password = authPassword.value;
-    authError.textContent = '';
-
-    const submitBtn = document.getElementById('auth-submit');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Please wait...';
-    submitBtn.disabled = true;
-
-    try {
-      const endpoint = authMode === 'signup' 
-        ? `${API_BASE}/api/auth/register`
-        : `${API_BASE}/api/auth/login`;
-
-      const payload = authMode === 'signup'
-        ? { name: authName.value.trim(), contact, password }
-        : { contact, password };
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        store.set(CURRENT_KEY, JSON.stringify(data.user));
-        if (data.token) store.set('sh_token', data.token);
-
-        const action = pendingAction;
-        closeAuth();
-        updateLogoutLinks();
-        if (action) action();
-      } else {
-        authError.textContent = data.message || 'Authentication failed. Please try again.';
-      }
-    } catch (err) {
-      console.error('Auth error:', err);
-      authError.textContent = 'Cannot connect to server. Ensure backend is running on port 5000!';
-    } finally {
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-    }
-  });
 
   // Customize links (arrow button and "Customize this product") need an account first
   document.addEventListener('click', (event) => {

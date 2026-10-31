@@ -106,36 +106,118 @@ app.get('/api/customizations', async (req, res) => {
 
 // ==================== AUTHENTICATION ROUTES ====================
 
-// 9. REGISTER (Sign Up a new customer)
+// Helper function to normalize Indian / 10-digit mobile numbers
+function cleanPhoneNumber(phone) {
+  if (!phone) return '';
+  let cleaned = phone.toString().replace(/[\s\-\(\)]/g, '').trim();
+  if (cleaned.startsWith('+91')) cleaned = cleaned.slice(3);
+  else if (cleaned.startsWith('91') && cleaned.length === 12) cleaned = cleaned.slice(2);
+  else if (cleaned.startsWith('0') && cleaned.length === 11) cleaned = cleaned.slice(1);
+  return cleaned;
+}
+
+// Temporary in-memory store for pending phone registration OTPs (15 min expiry)
+const pendingRegistrations = new Map();
+
+// 9.1 SEND REGISTRATION OTP (Verify phone before creating account)
+app.post('/api/auth/send-register-otp', async (req, res) => {
+  try {
+    const { name, phone, contact } = req.body;
+    const phoneInput = phone || contact;
+
+    if (!phoneInput) {
+      return res.status(400).json({ status: 'error', message: 'Please enter your 10-digit phone number.' });
+    }
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ status: 'error', message: 'Please enter your name.' });
+    }
+
+    const cleanPhone = cleanPhoneNumber(phoneInput);
+    if (!/^\d{10}$/.test(cleanPhone)) {
+      return res.status(400).json({ status: 'error', message: 'Please enter a valid 10-digit mobile number.' });
+    }
+
+    // Check if account with this phone already exists
+    const existing = await db.users.findOneAsync({ contact: cleanPhone });
+    if (existing) {
+      return res.status(400).json({ status: 'error', message: 'An account with this phone number already exists. Please log in.' });
+    }
+
+    // Generate 6-digit verification code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = Date.now() + 15 * 60 * 1000; // 15 mins
+    pendingRegistrations.set(cleanPhone, { name: name.trim(), code, expiresAt });
+
+    const whatsappNumber = process.env.SHOP_WHATSAPP || '917803859907';
+    const msg = `Hello, I am verifying my phone number (${cleanPhone}) to create my account on The Surprise House. My verification code is ${code}.`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
+
+    res.json({
+      status: 'success',
+      message: 'Verification code sent to your phone number!',
+      code,
+      phone: cleanPhone,
+      contact: cleanPhone,
+      whatsappUrl
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+// 9.2 REGISTER (Complete account creation with phone verification code)
 app.post('/api/auth/register', async (req, res) => {
   try {
-    const { name, contact, password } = req.body;
+    const { name, phone, contact, code, password } = req.body;
+    const phoneInput = phone || contact;
 
-    if (!name || !contact || !password) {
-      return res.status(400).json({ status: 'error', message: 'Name, contact, and password are required.' });
+    if (!phoneInput || !password) {
+      return res.status(400).json({ status: 'error', message: 'Phone number and password are required.' });
     }
 
-    const cleanContact = contact.trim().toLowerCase();
+    const cleanPhone = cleanPhoneNumber(phoneInput);
+    if (!/^\d{10}$/.test(cleanPhone)) {
+      return res.status(400).json({ status: 'error', message: 'Please enter a valid 10-digit mobile number.' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ status: 'error', message: 'Password must be at least 6 characters long.' });
+    }
+
+    // Check verification code
+    if (code) {
+      const pending = pendingRegistrations.get(cleanPhone);
+      if (!pending || pending.code !== code.toString().trim()) {
+        return res.status(400).json({ status: 'error', message: 'Invalid verification code. Please check and try again.' });
+      }
+      if (Date.now() > pending.expiresAt) {
+        return res.status(400).json({ status: 'error', message: 'Verification code has expired. Please request a new one.' });
+      }
+      pendingRegistrations.delete(cleanPhone);
+    }
 
     // Check if user already exists
-    const existing = await db.users.findOneAsync({ contact: cleanContact });
+    const existing = await db.users.findOneAsync({ contact: cleanPhone });
     if (existing) {
-      return res.status(400).json({ status: 'error', message: 'An account with this phone or email already exists. Please log in.' });
+      return res.status(400).json({ status: 'error', message: 'An account with this phone number already exists. Please log in.' });
     }
 
-    // Scramble the password securely with bcrypt
+    // Hash password securely with bcrypt
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Save into database
+    const userName = (name || (pendingRegistrations.get(cleanPhone) && pendingRegistrations.get(cleanPhone).name) || 'Customer').trim();
+
+    // Save user with phone & contact fields for full compatibility
     const newUser = await db.users.insertAsync({
-      name: name.trim(),
-      contact: cleanContact,
+      name: userName,
+      phone: cleanPhone,
+      contact: cleanPhone,
       passwordHash,
       createdAt: new Date()
     });
 
-    // Create a digital session badge (token)
     const token = jwt.sign(
       { id: newUser._id, contact: newUser.contact },
       process.env.JWT_SECRET || 'surprisehouse_secret_key_123',
@@ -145,7 +227,7 @@ app.post('/api/auth/register', async (req, res) => {
     res.status(201).json({
       status: 'success',
       message: 'Account created successfully! 🌸',
-      user: { name: newUser.name, contact: newUser.contact },
+      user: { name: newUser.name, phone: newUser.phone, contact: newUser.contact },
       token
     });
   } catch (err) {
@@ -153,30 +235,34 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// 10. LOGIN (Log in an existing customer)
+// 10. LOGIN (Log in using 10-digit Phone Number and Password)
 app.post('/api/auth/login', async (req, res) => {
   try {
-    const { contact, password } = req.body;
+    const { phone, contact, password } = req.body;
+    const phoneInput = phone || contact;
 
-    if (!contact || !password) {
-      return res.status(400).json({ status: 'error', message: 'Contact and password are required.' });
+    if (!phoneInput || !password) {
+      return res.status(400).json({ status: 'error', message: 'Phone number and password are required.' });
     }
 
-    const cleanContact = contact.trim().toLowerCase();
+    const cleanPhone = cleanPhoneNumber(phoneInput);
 
-    // Find the user in database
-    const user = await db.users.findOneAsync({ contact: cleanContact });
+    // Find the user by clean 10-digit phone, or fallback to exact string
+    let user = await db.users.findOneAsync({ contact: cleanPhone });
     if (!user) {
-      return res.status(400).json({ status: 'error', message: 'No account found with this contact. Please sign up.' });
+      user = await db.users.findOneAsync({ contact: phoneInput.toString().trim().toLowerCase() });
     }
 
-    // Check if the scrambled password matches
+    if (!user) {
+      return res.status(400).json({ status: 'error', message: 'No account found with this phone number. Please create an account.' });
+    }
+
+    // Check password
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      return res.status(400).json({ status: 'error', message: 'Incorrect password. Please try again.' });
+      return res.status(400).json({ status: 'error', message: 'Incorrect password. Please try again or click "Forgot password?".' });
     }
 
-    // Create a digital session badge (token)
     const token = jwt.sign(
       { id: user._id, contact: user.contact },
       process.env.JWT_SECRET || 'surprisehouse_secret_key_123',
@@ -186,7 +272,7 @@ app.post('/api/auth/login', async (req, res) => {
     res.json({
       status: 'success',
       message: 'Logged in successfully! 🌸',
-      user: { name: user.name, contact: user.contact },
+      user: { name: user.name, phone: user.phone || user.contact, contact: user.contact },
       token
     });
   } catch (err) {
@@ -194,35 +280,41 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// 10.5 FORGOT PASSWORD: Generate OTP / Reset Code
+// 10.5 FORGOT PASSWORD: Generate OTP / Reset Code for Phone Number
 app.post('/api/auth/forgot-password', async (req, res) => {
   try {
-    const { contact } = req.body;
-    if (!contact) {
-      return res.status(400).json({ status: 'error', message: 'Please provide your registered phone number or email.' });
+    const { phone, contact } = req.body;
+    const phoneInput = phone || contact;
+    if (!phoneInput) {
+      return res.status(400).json({ status: 'error', message: 'Please provide your registered 10-digit phone number.' });
     }
 
-    const cleanContact = contact.trim().toLowerCase();
-    const user = await db.users.findOneAsync({ contact: cleanContact });
+    const cleanPhone = cleanPhoneNumber(phoneInput);
+    let user = await db.users.findOneAsync({ contact: cleanPhone });
     if (!user) {
-      return res.status(404).json({ status: 'error', message: 'No registered account found with this phone number or email.' });
+      user = await db.users.findOneAsync({ contact: phoneInput.toString().trim().toLowerCase() });
+    }
+
+    if (!user) {
+      return res.status(404).json({ status: 'error', message: 'No registered account found with this phone number.' });
     }
 
     // Generate 6-digit verification code
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 15 * 60 * 1000; // 15 minutes
 
-    await db.users.updateAsync({ contact: cleanContact }, { $set: { resetOtp: code, resetOtpExpires: expiresAt } }, {});
+    await db.users.updateAsync({ _id: user._id }, { $set: { resetOtp: code, resetOtpExpires: expiresAt } }, {});
 
     const whatsappNumber = process.env.SHOP_WHATSAPP || '917803859907';
-    const msg = `Hello, I requested a password reset for my account (${cleanContact}) on The Surprise House. My verification code is ${code}.`;
+    const msg = `Hello, I requested a password reset for my account (${cleanPhone}) on The Surprise House. My verification code is ${code}.`;
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(msg)}`;
 
     res.json({
       status: 'success',
       message: 'Password reset code generated!',
       code,
-      contact: cleanContact,
+      phone: cleanPhone,
+      contact: cleanPhone,
       whatsappUrl
     });
   } catch (err) {
@@ -233,22 +325,27 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 // 10.6 RESET PASSWORD: Set new password with verified OTP
 app.post('/api/auth/reset-password', async (req, res) => {
   try {
-    const { contact, code, newPassword } = req.body;
-    if (!contact || !code || !newPassword) {
-      return res.status(400).json({ status: 'error', message: 'Contact, verification code, and new password are required.' });
+    const { phone, contact, code, newPassword } = req.body;
+    const phoneInput = phone || contact;
+    if (!phoneInput || !code || !newPassword) {
+      return res.status(400).json({ status: 'error', message: 'Phone number, verification code, and new password are required.' });
     }
 
     if (newPassword.length < 6) {
       return res.status(400).json({ status: 'error', message: 'Password must be at least 6 characters long.' });
     }
 
-    const cleanContact = contact.trim().toLowerCase();
-    const user = await db.users.findOneAsync({ contact: cleanContact });
+    const cleanPhone = cleanPhoneNumber(phoneInput);
+    let user = await db.users.findOneAsync({ contact: cleanPhone });
+    if (!user) {
+      user = await db.users.findOneAsync({ contact: phoneInput.toString().trim().toLowerCase() });
+    }
+
     if (!user) {
       return res.status(404).json({ status: 'error', message: 'User not found.' });
     }
 
-    if (!user.resetOtp || user.resetOtp !== code.trim()) {
+    if (!user.resetOtp || user.resetOtp !== code.toString().trim()) {
       return res.status(400).json({ status: 'error', message: 'Invalid verification code. Please check and try again.' });
     }
 
@@ -260,7 +357,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
     const passwordHash = await bcrypt.hash(newPassword, salt);
 
     await db.users.updateAsync(
-      { contact: cleanContact },
+      { _id: user._id },
       { $set: { passwordHash }, $unset: { resetOtp: true, resetOtpExpires: true } },
       {}
     );

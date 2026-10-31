@@ -235,45 +235,70 @@
   <div class="auth-box" role="dialog" aria-modal="true" aria-labelledby="auth-title">
     <button class="auth-close" type="button" id="auth-close" aria-label="Close">&times;</button>
     <h2 id="auth-title">Create your account</h2>
-    <p class="auth-note" id="auth-note">Please create an account to continue.</p>
+    <p class="auth-note" id="auth-note">Enter your name and phone number to get started.</p>
     <div class="auth-tabs" id="auth-tabs">
       <button type="button" data-mode="signup" class="active">Create account</button>
       <button type="button" data-mode="login">Log in</button>
     </div>
 
-    <!-- 1. LOGIN / SIGNUP FORM -->
-    <form class="auth-form" id="auth-form">
-      <input type="text" id="auth-name" placeholder="Your name" autocomplete="name">
-      <input type="text" id="auth-contact" placeholder="Phone number or email" autocomplete="username" required>
-      <input type="password" id="auth-password" placeholder="Password (at least 6 characters)" minlength="6" autocomplete="current-password" required>
-      <div class="auth-extra-links" id="auth-login-extra" hidden>
-        <button type="button" class="auth-link-btn" id="auth-forgot-link">Forgot password?</button>
-      </div>
-      <p class="auth-error" id="auth-error"></p>
-      <button class="pd-cart" type="submit" id="auth-submit">Create account</button>
+    <!-- 1. SIGNUP STEP 1: Name + Phone -> Get Code -->
+    <form class="auth-form" id="auth-signup-step1-form">
+      <input type="text" id="auth-signup-name" placeholder="Your name" autocomplete="name" required>
+      <input type="tel" id="auth-signup-phone" placeholder="10-digit mobile number" maxlength="14" autocomplete="tel" required>
+      <p class="auth-error" id="auth-signup-error1"></p>
+      <button class="pd-cart" type="submit" id="auth-signup-submit1">Get verification code</button>
     </form>
 
-    <!-- 2. FORGOT PASSWORD STEP 1: REQUEST OTP -->
+    <!-- 2. SIGNUP STEP 2: Show OTP + Code Input + Password -> Create Account -->
+    <form class="auth-form" id="auth-signup-step2-form" hidden>
+      <div class="auth-otp-card">
+        <p class="auth-otp-label">Verification code for <strong id="auth-signup-otp-target"></strong>:</p>
+        <div class="auth-otp-code" id="auth-signup-otp-display">------</div>
+        <p class="auth-otp-hint">Code is auto-filled below for you (valid 15 mins).</p>
+        <a href="#" target="_blank" rel="noopener" class="auth-wa-pill" id="auth-signup-otp-wa">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="ico-wa"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z"/><path d="M9 9.5c.2 2 2.5 4.5 5 5l1.5-1.5-1.8-.9-.8.8c-.9-.4-1.9-1.4-2.3-2.3l.8-.8-.9-1.8z"/></svg>
+          <span>Verify via WhatsApp Support</span>
+        </a>
+      </div>
+      <input type="text" id="auth-signup-code" placeholder="Enter 6-digit verification code" maxlength="6" required>
+      <input type="password" id="auth-signup-password" placeholder="Create password (at least 6 characters)" minlength="6" autocomplete="new-password" required>
+      <p class="auth-error" id="auth-signup-error2"></p>
+      <button class="pd-cart" type="submit" id="auth-signup-submit2">Verify &amp; Create account</button>
+      <button type="button" class="auth-link-btn auth-back-btn" id="auth-signup-back">← Change phone number</button>
+    </form>
+
+    <!-- 3. LOGIN FORM: Phone + Password -->
+    <form class="auth-form" id="auth-login-form" hidden>
+      <input type="tel" id="auth-login-phone" placeholder="10-digit mobile number" maxlength="14" autocomplete="tel" required>
+      <input type="password" id="auth-login-password" placeholder="Password" autocomplete="current-password" required>
+      <div class="auth-extra-links" id="auth-login-extra">
+        <button type="button" class="auth-link-btn" id="auth-forgot-link">Forgot password?</button>
+      </div>
+      <p class="auth-error" id="auth-login-error"></p>
+      <button class="pd-cart" type="submit" id="auth-login-submit">Log in</button>
+    </form>
+
+    <!-- 4. FORGOT PASSWORD STEP 1: Phone -> Get Reset Code -->
     <form class="auth-form" id="auth-forgot-form" hidden>
-      <input type="text" id="auth-forgot-contact" placeholder="Registered phone number or email" required>
+      <input type="tel" id="auth-forgot-phone" placeholder="10-digit registered phone number" maxlength="14" autocomplete="tel" required>
       <p class="auth-error" id="auth-forgot-error"></p>
       <button class="pd-cart" type="submit" id="auth-forgot-submit">Get verification code</button>
       <button type="button" class="auth-link-btn auth-back-btn" id="auth-forgot-back">← Back to log in</button>
     </form>
 
-    <!-- 3. FORGOT PASSWORD STEP 2: VERIFY OTP & RESET -->
+    <!-- 5. FORGOT PASSWORD STEP 2: Show OTP + Code Input + New Password -> Set New Password -->
     <form class="auth-form" id="auth-reset-form" hidden>
-      <div class="auth-otp-card" id="auth-otp-card">
-        <p class="auth-otp-label">Verification code for <strong id="auth-otp-target"></strong>:</p>
-        <div class="auth-otp-code" id="auth-otp-display">------</div>
+      <div class="auth-otp-card">
+        <p class="auth-otp-label">Verification code for <strong id="auth-reset-otp-target"></strong>:</p>
+        <div class="auth-otp-code" id="auth-reset-otp-display">------</div>
         <p class="auth-otp-hint">Code is auto-filled below for you (valid 15 mins).</p>
-        <a href="#" target="_blank" rel="noopener" class="auth-wa-pill" id="auth-otp-wa">
+        <a href="#" target="_blank" rel="noopener" class="auth-wa-pill" id="auth-reset-otp-wa">
           <svg viewBox="0 0 24 24" aria-hidden="true" class="ico-wa"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z"/><path d="M9 9.5c.2 2 2.5 4.5 5 5l1.5-1.5-1.8-.9-.8.8c-.9-.4-1.9-1.4-2.3-2.3l.8-.8-.9-1.8z"/></svg>
           <span>Verify via WhatsApp Support</span>
         </a>
       </div>
       <input type="text" id="auth-reset-code" placeholder="Enter 6-digit verification code" maxlength="6" required>
-      <input type="password" id="auth-reset-password" placeholder="New password (at least 6 characters)" minlength="6" required>
+      <input type="password" id="auth-reset-password" placeholder="New password (at least 6 characters)" minlength="6" autocomplete="new-password" required>
       <p class="auth-error" id="auth-reset-error"></p>
       <button class="pd-cart" type="submit" id="auth-reset-submit">Set New Password</button>
       <button type="button" class="auth-link-btn auth-back-btn" id="auth-reset-back">← Back to log in</button>
