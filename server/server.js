@@ -166,54 +166,66 @@ app.post('/api/auth/send-register-otp', async (req, res) => {
   }
 });
 
-// 9.2 REGISTER (Complete account creation with phone verification code)
+// 9.2 REGISTER (Complete account creation with email or phone)
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, phone, contact, code, password } = req.body;
-    const phoneInput = phone || contact;
+    const rawContact = (contact || phone || '').toString().trim();
 
-    if (!phoneInput || !password) {
-      return res.status(400).json({ status: 'error', message: 'Phone number and password are required.' });
+    if (!rawContact || !password) {
+      return res.status(400).json({ status: 'error', message: 'Email address and password are required.' });
     }
 
-    const cleanPhone = cleanPhoneNumber(phoneInput);
-    if (!/^\d{10}$/.test(cleanPhone)) {
-      return res.status(400).json({ status: 'error', message: 'Please enter a valid 10-digit mobile number.' });
+    const isEmail = rawContact.includes('@');
+    let cleanContact = '';
+    if (isEmail) {
+      cleanContact = rawContact.toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanContact)) {
+        return res.status(400).json({ status: 'error', message: 'Please enter a valid email address.' });
+      }
+    } else {
+      cleanContact = cleanPhoneNumber(rawContact);
+      if (!/^\d{10}$/.test(cleanContact)) {
+        return res.status(400).json({ status: 'error', message: 'Please enter a valid email address or 10-digit mobile number.' });
+      }
     }
 
     if (password.length < 6) {
       return res.status(400).json({ status: 'error', message: 'Password must be at least 6 characters long.' });
     }
 
-    // Check verification code
-    if (code) {
-      const pending = pendingRegistrations.get(cleanPhone);
+    // Check verification code if provided
+    if (code && !isEmail) {
+      const pending = pendingRegistrations.get(cleanContact);
       if (!pending || pending.code !== code.toString().trim()) {
         return res.status(400).json({ status: 'error', message: 'Invalid verification code. Please check and try again.' });
       }
       if (Date.now() > pending.expiresAt) {
         return res.status(400).json({ status: 'error', message: 'Verification code has expired. Please request a new one.' });
       }
-      pendingRegistrations.delete(cleanPhone);
+      pendingRegistrations.delete(cleanContact);
     }
 
     // Check if user already exists
-    const existing = await db.users.findOneAsync({ contact: cleanPhone });
+    let existing = await db.users.findOneAsync({ contact: cleanContact });
+    if (!existing && !isEmail) {
+      existing = await db.users.findOneAsync({ phone: cleanContact });
+    }
     if (existing) {
-      return res.status(400).json({ status: 'error', message: 'An account with this phone number already exists. Please log in.' });
+      return res.status(400).json({ status: 'error', message: 'An account with this ' + (isEmail ? 'email address' : 'phone number') + ' already exists. Please log in.' });
     }
 
     // Hash password securely with bcrypt
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    const userName = (name || (pendingRegistrations.get(cleanPhone) && pendingRegistrations.get(cleanPhone).name) || 'Customer').trim();
+    const userName = (name || (isEmail ? cleanContact.split('@')[0] : 'Customer')).trim();
 
-    // Save user with phone & contact fields for full compatibility
+    // Save user
     const newUser = await db.users.insertAsync({
       name: userName,
-      phone: cleanPhone,
-      contact: cleanPhone,
+      phone: isEmail ? '' : cleanContact,
+      contact: cleanContact,
       passwordHash,
       createdAt: new Date()
     });
@@ -235,32 +247,36 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// 10. LOGIN (Log in using 10-digit Phone Number and Password)
+// 10. LOGIN (Log in using Email address or Phone Number and Password)
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { phone, contact, password } = req.body;
-    const phoneInput = phone || contact;
+    const rawContact = (contact || phone || '').toString().trim();
 
-    if (!phoneInput || !password) {
-      return res.status(400).json({ status: 'error', message: 'Phone number and password are required.' });
+    if (!rawContact || !password) {
+      return res.status(400).json({ status: 'error', message: 'Email address and password are required.' });
     }
 
-    const cleanPhone = cleanPhoneNumber(phoneInput);
+    const isEmail = rawContact.includes('@');
+    let cleanContact = isEmail ? rawContact.toLowerCase() : cleanPhoneNumber(rawContact);
 
-    // Find the user by clean 10-digit phone, or fallback to exact string
-    let user = await db.users.findOneAsync({ contact: cleanPhone });
+    // Find the user by contact or phone
+    let user = await db.users.findOneAsync({ contact: cleanContact });
+    if (!user && !isEmail) {
+      user = await db.users.findOneAsync({ phone: cleanContact });
+    }
     if (!user) {
-      user = await db.users.findOneAsync({ contact: phoneInput.toString().trim().toLowerCase() });
+      user = await db.users.findOneAsync({ contact: rawContact.toLowerCase() });
     }
 
     if (!user) {
-      return res.status(400).json({ status: 'error', message: 'No account found with this phone number. Please create an account.' });
+      return res.status(400).json({ status: 'error', message: 'No account found with this ' + (isEmail ? 'email address' : 'phone number') + '. Please create an account.' });
     }
 
     // Check password
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      return res.status(400).json({ status: 'error', message: 'Incorrect password. Please try again or click "Forgot password?".' });
+      return res.status(400).json({ status: 'error', message: 'Incorrect password. Please try again.' });
     }
 
     const token = jwt.sign(

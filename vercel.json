@@ -1,0 +1,21 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://project-1-the-surprise-house.onrender.com/api/:path*"
+    },
+    {
+      "source": "/uploads/:path*",
+      "destination": "https://project-1-the-surprise-house.onrender.com/uploads/:path*"
+    },
+    {
+      "source": "/",
+      "destination": "/client/index.html"
+    },
+    {
+      "source": "/((?!api/|uploads/|client/).*)",
+      "destination": "/client/$1"
+    }
+  ]
+}
