@@ -29,3 +29,5 @@ client/supabase_test.html/
 public/
 firebase.json
 scratch/
+
+.vercel
